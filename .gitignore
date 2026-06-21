@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Downloaded raw transcripts (source material)
+.transcripts/
+
+# Local verification artifacts
+dev.log
+verify-*.png
+verify-run.*
+*.docx

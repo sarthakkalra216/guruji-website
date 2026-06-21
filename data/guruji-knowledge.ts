@@ -287,6 +287,10 @@ export interface SampleQuestion {
 }
 
 export const sampleQuestions: SampleQuestion[] = [
+  { question: "सेवा का महत्व क्या है?", categoryId: "seva" },
+  { question: "मन को शांत कैसे करें?", categoryId: "meditation" },
+  { question: "सच्ची भक्ति क्या है?", categoryId: "faith" },
+  { question: "गुरु की शरण में क्यों जाना चाहिए?", categoryId: "faith" },
   { question: "Who is Guruji Nakur Wale Baba Ji?", categoryId: "faith" },
   { question: "What are Guruji's core teachings?", categoryId: "faith" },
   { question: "Why is seva so important according to Guruji?", categoryId: "seva" },
