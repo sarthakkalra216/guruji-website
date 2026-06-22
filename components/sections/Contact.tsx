@@ -7,11 +7,11 @@ import { RamBackground } from "@/components/decor/SacredBackground"
 
 const CONTACT = {
   address: "Pant Vihar, Saharanpur, Uttar Pradesh",
-  email: "nakurwalebabai@gmail.com",
+  email: "nakurwalebabaji@gmail.com",
 }
 
 // Web3Forms access key. Get a free key at https://web3forms.com using the email
-// nakurwalebabai@gmail.com — submissions are delivered straight to that inbox.
+// nakurwalebabaji@gmail.com — submissions are delivered straight to that inbox.
 // Paste the key you receive below (it is safe to expose; Web3Forms keys are public).
 const WEB3FORMS_ACCESS_KEY = "af8b1bf1-411e-451f-9f51-2550f250092e"
 
@@ -61,7 +61,7 @@ export default function Contact() {
           access_key: WEB3FORMS_ACCESS_KEY,
           subject: "New message from Guruji website contact form",
           from_name: "Nakur Wale Baba Ji Website",
-          cc: ["sarthakkalra34@gmail.com"],
+          cc: ["nakurwalebabaji@gmail.com"],
           name: form.name,
           email: form.email || "Not provided",
           phone: form.phone || "Not provided",

@@ -6,7 +6,7 @@ const LOCATION = "Nakur, Saharanpur, Uttar Pradesh"
 
 const CONTACT = {
   address: "Pant Vihar, Saharanpur, Uttar Pradesh",
-  email: "nakurwalebabai@gmail.com",
+  email: "nakurwalebabaji@gmail.com",
 }
 
 const SOCIAL = {
