@@ -3,7 +3,14 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { MapPin, Phone, Mail, MessageCircle, CheckCircle, Send } from "lucide-react"
-import { gurujiProfile } from "@/data/guruji-profile"
+import { RamBackground } from "@/components/decor/SacredBackground"
+
+const CONTACT = {
+  address: "Shri Guruji Ashram, Nakur, District Saharanpur, Uttar Pradesh — 247341",
+  phone: "+91 XXXXX XXXXX",
+  email: "info@gurujinakurwale.com",
+  whatsapp: "+91 XXXXX XXXXX",
+}
 
 interface FormState {
   name: string
@@ -60,8 +67,9 @@ export default function Contact() {
             "radial-gradient(ellipse 60% 50% at 0% 100%, rgba(212,168,67,0.07), transparent), radial-gradient(ellipse 50% 45% at 100% 0%, rgba(88,28,135,0.1), transparent)",
         }}
       />
+      <RamBackground variant="tiled" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial="hidden"
@@ -239,9 +247,9 @@ export default function Contact() {
               </h3>
 
               {[
-                { icon: <MapPin size={16} />, label: "Address", value: gurujiProfile.contact.address },
-                { icon: <Phone size={16} />, label: "Phone", value: gurujiProfile.contact.phone ?? "" },
-                { icon: <Mail size={16} />, label: "Email", value: gurujiProfile.contact.email ?? "" },
+                { icon: <MapPin size={16} />, label: "Address", value: CONTACT.address },
+                { icon: <Phone size={16} />, label: "Phone", value: CONTACT.phone },
+                { icon: <Mail size={16} />, label: "Email", value: CONTACT.email },
               ].map((item) => (
                 <div key={item.label} className="flex gap-3">
                   <div
@@ -265,7 +273,7 @@ export default function Contact() {
 
             {/* WhatsApp */}
             <a
-              href={`https://wa.me/${gurujiProfile.contact.whatsapp?.replace(/[^0-9]/g, "")}`}
+              href={`https://wa.me/${CONTACT.whatsapp.replace(/[^0-9]/g, "")}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 p-5 rounded-2xl transition-all duration-300 hover:scale-[1.02] group"

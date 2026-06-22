@@ -2,24 +2,14 @@
 
 import { useRef, useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Play, Pause, Volume2, VolumeX } from "lucide-react"
+import { Play, Pause, Volume2, VolumeX, VideoOff } from "lucide-react"
+import { RamBackground } from "@/components/decor/SacredBackground"
+import { AmbientVideo } from "@/components/decor/AmbientVideo"
 
-const VIDEOS = [
-  {
-    src: "/gallery/video1.mp4",
-    poster: "/gallery/photo3.jpeg",
-    title: "Ashram Darshan",
-    subtitle: "Sacred moments from Guruji's Nakur ashram",
-    label: "01",
-  },
-  {
-    src: "/gallery/video2.mp4",
-    poster: "/gallery/photo1.jpeg",
-    title: "Divine Presence",
-    subtitle: "Blessed satsang recordings from Nakur",
-    label: "02",
-  },
-]
+export interface VideoItem {
+  src: string
+  name: string
+}
 
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } }
 const fadeUp = {
@@ -27,27 +17,22 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 }
 
-// ── Individual video card ────────────────────────────────────────────────────
-
-interface VideoData {
-  src: string
-  poster: string
-  title: string
-  subtitle: string
-  label: string
-}
-
-function VideoCard({ video, index }: { video: VideoData; index: number }) {
+function VideoCard({ video, index }: { video: VideoItem; index: number }) {
   const [playing, setPlaying] = useState(false)
-  const [muted, setMuted]     = useState(false)
+  const [muted, setMuted] = useState(false)
+  const [ratio, setRatio] = useState<number | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  // Sync muted state to DOM property after every render.
-  // We do NOT put `muted` as a prop on <video> — React sets only the HTML
-  // attribute (sticky), not the DOM property (what the browser reads).
+  // Keep the DOM `muted` property in sync (React only sets the attribute).
   useEffect(() => {
     if (videoRef.current) videoRef.current.muted = muted
   })
+
+  // Read the video's true aspect ratio so it displays uncropped.
+  const onMeta = () => {
+    const v = videoRef.current
+    if (v && v.videoWidth && v.videoHeight) setRatio(v.videoWidth / v.videoHeight)
+  }
 
   const handlePlay = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -70,145 +55,106 @@ function VideoCard({ video, index }: { video: VideoData; index: number }) {
     setMuted(next)
   }
 
+  const label = String(index + 1).padStart(2, "0")
+
   return (
     <motion.div
       variants={fadeUp}
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -5 }}
       transition={{ duration: 0.25 }}
-      className="flex flex-col rounded-3xl overflow-hidden"
+      className="group relative rounded-3xl overflow-hidden"
       style={{
-        background: "rgba(255,255,255,0.03)",
-        border: "1px solid rgba(212,168,67,0.16)",
+        background: "#000",
+        border: "1px solid rgba(212,168,67,0.18)",
         boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
       }}
     >
-      {/* ── Video area — fixed aspect ratio so both cards are always equal ── */}
-      <div className="relative aspect-video bg-black overflow-hidden">
-        {/* Video — NO muted prop */}
+      {/* Video area — sizes to the video's own aspect ratio, shown uncropped */}
+      <div
+        className="relative w-full"
+        style={{ aspectRatio: ratio ?? 16 / 9, background: "#000" }}
+      >
         <video
           ref={videoRef}
           src={video.src}
-          poster={video.poster}
+          preload="metadata"
           playsInline
           loop
-          className="w-full h-full object-cover"
+          onLoadedMetadata={onMeta}
           onEnded={() => setPlaying(false)}
           onClick={handlePlay}
+          className="absolute inset-0 w-full h-full object-contain"
           style={{ cursor: "pointer" }}
         />
 
-        {/* Dim overlay + centre play button when paused */}
+        {/* Number badge */}
+        <span
+          className="absolute top-3 left-3 z-10 font-serif font-bold tabular-nums text-sm px-3 py-1 rounded-full pointer-events-none"
+          style={{
+            background: "rgba(0,0,0,0.55)",
+            backdropFilter: "blur(8px)",
+            color: "#fde68a",
+            border: "1px solid rgba(212,168,67,0.3)",
+          }}
+        >
+          {label}
+        </span>
+
+        {/* Live dot */}
+        {playing && (
+          <span className="absolute top-3 right-3 z-10 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse pointer-events-none" />
+        )}
+
+        {/* Centre play button when paused */}
         {!playing && (
-          <div
-            className="absolute inset-0 flex items-center justify-center"
-            style={{ background: "rgba(0,0,0,0.35)" }}
+          <button
             onClick={handlePlay}
+            aria-label="Play"
+            className="absolute inset-0 z-10 flex items-center justify-center"
+            style={{ background: "rgba(0,0,0,0.28)" }}
           >
-            <motion.div
+            <motion.span
               whileHover={{ scale: 1.12 }}
               whileTap={{ scale: 0.93 }}
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center cursor-pointer shadow-2xl shadow-amber-400/35"
-              style={{ background: "rgba(212,168,67,0.92)" }}
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center shadow-2xl shadow-amber-400/35"
+              style={{ background: "rgba(212,168,67,0.94)" }}
             >
               <Play size={28} className="text-slate-900 ml-1" fill="currentColor" />
-            </motion.div>
-          </div>
-        )}
-
-        {/* Top bar: label + pause button (only when playing) */}
-        <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
-          <span
-            className="text-[11px] font-bold tabular-nums px-2.5 py-1 rounded-full"
-            style={{
-              background: "rgba(0,0,0,0.55)",
-              backdropFilter: "blur(8px)",
-              color: "#fde68a",
-              border: "1px solid rgba(212,168,67,0.2)",
-            }}
-          >
-            {video.label}
-          </span>
-
-          {playing && (
-            <button
-              onClick={handlePlay}
-              aria-label="Pause"
-              className="pointer-events-auto w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110"
-              style={{
-                background: "rgba(0,0,0,0.55)",
-                backdropFilter: "blur(8px)",
-                border: "1px solid rgba(255,255,255,0.15)",
-              }}
-            >
-              <Pause size={15} className="text-white" fill="currentColor" />
-            </button>
-          )}
-        </div>
-
-        {/* Bottom bar: mute button */}
-        <div className="absolute bottom-3 right-3 pointer-events-none">
-          <button
-            onClick={toggleMute}
-            aria-label={muted ? "Unmute" : "Mute"}
-            className="pointer-events-auto w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110"
-            style={{
-              background: "rgba(0,0,0,0.55)",
-              backdropFilter: "blur(8px)",
-              border: "1px solid rgba(255,255,255,0.15)",
-            }}
-          >
-            {muted
-              ? <VolumeX size={15} className="text-white/60" />
-              : <Volume2 size={15} className="text-amber-400" />
-            }
+            </motion.span>
           </button>
-        </div>
-
-        {/* Playing indicator pulse */}
-        {playing && (
-          <div className="absolute top-3 right-3 pointer-events-none">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse inline-block" />
-          </div>
         )}
-      </div>
 
-      {/* ── Info bar ── */}
-      <div className="px-5 py-4 flex items-center justify-between">
-        <div>
-          <h3 className="font-serif text-base sm:text-lg font-bold text-amber-50 leading-tight">
-            {video.title}
-          </h3>
-          <p className="text-amber-200/50 text-xs mt-0.5">{video.subtitle}</p>
-        </div>
+        {/* Controls when playing */}
+        {playing && (
+          <button
+            onClick={handlePlay}
+            aria-label="Pause"
+            className="absolute bottom-3 left-3 z-10 w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110"
+            style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)" }}
+          >
+            <Pause size={15} className="text-white" fill="currentColor" />
+          </button>
+        )}
+
+        {/* Mute */}
         <button
-          onClick={handlePlay}
-          aria-label={playing ? "Pause" : "Play"}
-          className="shrink-0 ml-4 px-4 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all duration-200 hover:scale-105"
-          style={
-            playing
-              ? {
-                  background: "rgba(255,255,255,0.07)",
-                  border: "1px solid rgba(255,255,255,0.15)",
-                  color: "#fde68a",
-                }
-              : {
-                  background: "linear-gradient(135deg,#f59e0b,#d4a843)",
-                  color: "#1a0a00",
-                }
-          }
+          onClick={toggleMute}
+          aria-label={muted ? "Unmute" : "Mute"}
+          className="absolute bottom-3 right-3 z-10 w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110"
+          style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)" }}
         >
-          {playing ? "Pause" : "Play"}
+          {muted ? <VolumeX size={15} className="text-white/60" /> : <Volume2 size={15} className="text-amber-400" />}
         </button>
       </div>
     </motion.div>
   )
 }
 
-// ── Section ──────────────────────────────────────────────────────────────────
-
-export default function VideoGallery() {
+export default function VideoGallery({ videos }: { videos: VideoItem[] }) {
   return (
     <section id="videos" className="relative py-24 sm:py-32 overflow-hidden">
+      {/* Ambient looping video backdrop — blends into the page colour */}
+      <AmbientVideo src="/videos/video2.mp4" opacity={0.22} className="z-0" />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -216,8 +162,9 @@ export default function VideoGallery() {
             "radial-gradient(ellipse 65% 50% at 50% 50%, rgba(88,28,135,0.1), transparent)",
         }}
       />
+      <RamBackground variant="tiled" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial="hidden"
@@ -248,18 +195,24 @@ export default function VideoGallery() {
           <motion.div variants={fadeUp} className="section-divider" />
         </motion.div>
 
-        {/* Equal-size video grid */}
-        <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          variants={stagger}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-5xl mx-auto"
-        >
-          {VIDEOS.map((v, i) => (
-            <VideoCard key={v.src} video={v} index={i} />
-          ))}
-        </motion.div>
+        {videos.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 text-amber-200/40 py-20">
+            <VideoOff size={36} />
+            <p className="text-sm">No videos yet. Add files to <code>public/videos</code>.</p>
+          </div>
+        ) : (
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto items-start"
+          >
+            {videos.map((v, i) => (
+              <VideoCard key={v.src} video={v} index={i} />
+            ))}
+          </motion.div>
+        )}
       </div>
     </section>
   )

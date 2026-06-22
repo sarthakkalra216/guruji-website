@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { Quote } from "lucide-react"
+import { RamBackground } from "@/components/decor/SacredBackground"
 
 interface Testimonial {
   id: number
@@ -118,8 +119,9 @@ export default function Testimonials() {
             "radial-gradient(ellipse 70% 50% at 50% 50%, rgba(88,28,135,0.1), transparent)",
         }}
       />
+      <RamBackground variant="tiled" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}

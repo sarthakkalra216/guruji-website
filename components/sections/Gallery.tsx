@@ -1,107 +1,60 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import Image from "next/image"
-import { ChevronLeft, ChevronRight, X, ZoomIn, Pause, Play } from "lucide-react"
+import { ChevronLeft, ChevronRight, X, ZoomIn, ImageOff } from "lucide-react"
+import { RamBackground } from "@/components/decor/SacredBackground"
+import { AmbientVideo } from "@/components/decor/AmbientVideo"
 
-const PHOTOS = [
-  {
-    src: "/gallery/photo1.jpeg",
-    alt: "Guruji Nakur Wale Baba Ji darshan — morning satsang at Nakur ashram",
-    title: "Guruji Darshan — Morning Satsang",
-    subtitle: "Nakur Ashram",
-    category: "Satsang",
-  },
-  {
-    src: "/gallery/photo2.jpeg",
-    alt: "Guruji Nakur Wale Baba Ji — evening aarti darshan at Nakur ashram",
-    title: "Evening Aarti Darshan",
-    subtitle: "Nakur Ashram",
-    category: "Satsang",
-  },
-  {
-    src: "/gallery/photo3.jpeg",
-    alt: "Sacred shrine of Guruji Nakur Wale Baba Ji with Krishna deity",
-    title: "Sacred Shrine of Guruji",
-    subtitle: "Festival Decoration — Nakur Ashram",
-    category: "Events",
-  },
-  {
-    src: "/gallery/photo4.jpeg",
-    alt: "Blessed darshan of Guruji Nakur Wale Baba Ji at Nakur ashram",
-    title: "Blessed Darshan of Guruji",
-    subtitle: "Nakur Ashram",
-    category: "Satsang",
-  },
-  {
-    src: "/gallery/photo5.jpeg",
-    alt: "Sacred padukas of Guruji Nakur Wale Baba Ji with flower offerings — pushpa seva",
-    title: "Sacred Padukas — Pushpa Seva",
-    subtitle: "Nakur Ashram",
-    category: "Seva",
-  },
-]
-
-const N = PHOTOS.length
-const AUTOPLAY_DELAY = 4500
-
-// No `ease` inside variant transitions — Framer Motion v12 TypeScript constraint
-const slideVariants = {
-  enter: (dir: number) => ({
-    x: dir > 0 ? "100%" : "-100%",
-    opacity: 0,
-    scale: 0.94,
-  }),
-  center: { x: 0, opacity: 1, scale: 1 },
-  exit: (dir: number) => ({
-    x: dir > 0 ? "-100%" : "100%",
-    opacity: 0,
-    scale: 0.94,
-  }),
+export interface GalleryImage {
+  src: string
+  name: string
 }
 
-const headerStagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
-}
+const ALT = "Guruji Nakur Wale Baba Ji — sacred moment at the Nakur ashram"
+
+const headerStagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } }
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   show: { opacity: 1, y: 0, transition: { duration: 0.55 } },
 }
 
-export default function Gallery() {
-  const [current, setCurrent] = useState(0)
-  const [direction, setDirection] = useState(1)
-  const [autoPlaying, setAutoPlaying] = useState(true)
-  const [lightbox, setLightbox] = useState(false)
-  const dragActive = useRef(false)
+// Spring used for the shared-element (thumbnail ⇄ fullscreen) morph
+const morph = { type: "spring" as const, stiffness: 220, damping: 28 }
 
-  const paginate = useCallback((dir: number) => {
-    setDirection(dir)
-    setCurrent((prev) => ((prev + dir) % N + N) % N)
-  }, [])
+export default function Gallery({ images }: { images: GalleryImage[] }) {
+  const [active, setActive] = useState<number | null>(null)
+  const count = images.length
 
-  const goTo = useCallback(
-    (idx: number) => {
-      if (idx === current) return
-      setDirection(idx > current ? 1 : -1)
-      setCurrent(idx)
-    },
-    [current]
+  const close = useCallback(() => setActive(null), [])
+  const paginate = useCallback(
+    (dir: number) => setActive((i) => (i === null ? i : (i + dir + count) % count)),
+    [count]
   )
 
-  // Auto-play — reset timer whenever current changes (covers manual nav too)
   useEffect(() => {
-    if (!autoPlaying) return
-    const id = setInterval(() => paginate(1), AUTOPLAY_DELAY)
-    return () => clearInterval(id)
-  }, [autoPlaying, current, paginate])
+    if (active === null) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close()
+      else if (e.key === "ArrowRight") paginate(1)
+      else if (e.key === "ArrowLeft") paginate(-1)
+    }
+    window.addEventListener("keydown", onKey)
+    document.body.style.overflow = "hidden"
+    return () => {
+      window.removeEventListener("keydown", onKey)
+      document.body.style.overflow = ""
+    }
+  }, [active, close, paginate])
 
-  const photo = PHOTOS[current]
+  const activeImg = active !== null ? images[active] : null
 
   return (
     <section id="gallery" className="relative py-24 sm:py-32 overflow-hidden">
+      {/* Ambient video backdrop above the gallery — blends into page */}
+      <div className="absolute top-0 inset-x-0 h-[78vh] z-0">
+        <AmbientVideo src="/background%20effect/gallery-bg.mp4" />
+      </div>
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -109,8 +62,9 @@ export default function Gallery() {
             "radial-gradient(ellipse 70% 60% at 50% 10%, rgba(88,28,135,0.14), transparent)",
         }}
       />
+      <RamBackground variant="floating" opacity={0.06} />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <motion.div
           initial="hidden"
@@ -140,363 +94,142 @@ export default function Gallery() {
           <motion.div variants={fadeUp} className="section-divider" />
         </motion.div>
 
-        {/* ── Carousel ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-        >
-          {/* Main stage */}
-          <div
-            className="relative w-full aspect-[3/4] sm:aspect-[16/9] rounded-3xl overflow-hidden select-none"
-            onMouseEnter={() => setAutoPlaying(false)}
-            onMouseLeave={() => setAutoPlaying(true)}
-            style={{
-              boxShadow:
-                "0 32px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(212,168,67,0.13)",
-            }}
-          >
-            {/* Blurred bokeh background — crossfades with each slide */}
-            <AnimatePresence mode="sync">
-              <motion.div
-                key={`bg-${current}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.7 }}
-                className="absolute inset-0 pointer-events-none"
+        {/* ── Masonry grid ── */}
+        {count === 0 ? (
+          <div className="flex flex-col items-center gap-3 text-amber-200/40 py-20">
+            <ImageOff size={36} />
+            <p className="text-sm">No images yet. Add photos to <code>public/images</code>.</p>
+          </div>
+        ) : (
+          <div className="columns-2 md:columns-3 lg:columns-4 gap-4 sm:gap-5">
+            {images.map((img, i) => (
+              <motion.button
+                key={img.src}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.5, delay: Math.min(i * 0.04, 0.4) }}
+                onClick={() => setActive(i)}
+                className="group relative mb-4 sm:mb-5 block w-full break-inside-avoid overflow-hidden rounded-2xl cursor-pointer"
+                style={{ border: "1px solid rgba(212,168,67,0.14)" }}
+                aria-label={`Open image ${i + 1}`}
               >
-                <Image
-                  src={photo.src}
-                  alt=""
-                  fill
-                  className="object-cover scale-110"
-                  style={{ filter: "blur(28px)", opacity: 0.45 }}
-                  aria-hidden
-                  sizes="10vw"
+                {/* Shared-element thumbnail (morphs into the fullscreen view) */}
+                <motion.img
+                  layoutId={`gal-${img.src}`}
+                  transition={morph}
+                  src={img.src}
+                  alt={ALT}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-auto block transition-transform duration-500 ease-out group-hover:scale-[1.06]"
                 />
-                <div className="absolute inset-0 bg-black/55" />
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Sliding image */}
-            <AnimatePresence initial={false} custom={direction} mode="sync">
-              <motion.div
-                key={current}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.55, ease: "easeOut" }}
-                className="absolute inset-0 flex items-center justify-center"
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.12}
-                onDragStart={() => {
-                  dragActive.current = false
-                }}
-                onDrag={(_, info) => {
-                  if (Math.abs(info.offset.x) > 6) dragActive.current = true
-                }}
-                onDragEnd={(_, info) => {
-                  const power =
-                    Math.abs(info.offset.x) * Math.abs(info.velocity.x)
-                  if (power > 8000) {
-                    paginate(info.offset.x < 0 ? 1 : -1)
-                  }
-                  setTimeout(() => {
-                    dragActive.current = false
-                  }, 80)
-                }}
-                onClick={() => {
-                  if (!dragActive.current) setLightbox(true)
-                }}
-                style={{ cursor: "grab" }}
-              >
-                <Image
-                  src={photo.src}
-                  alt={photo.alt}
-                  fill
-                  className="object-contain"
-                  priority={current === 0}
-                  sizes="(max-width: 640px) 100vw, 90vw"
-                  draggable={false}
-                />
-                {/* Zoom hint on hover */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black/10 pointer-events-none">
+                {/* Hover overlay */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/55 via-black/10 to-transparent">
                   <div
-                    className="w-14 h-14 rounded-full flex items-center justify-center"
+                    className="w-12 h-12 rounded-full flex items-center justify-center translate-y-2 group-hover:translate-y-0 transition-transform duration-300"
                     style={{
-                      background: "rgba(0,0,0,0.45)",
+                      background: "rgba(0,0,0,0.5)",
                       backdropFilter: "blur(10px)",
-                      border: "1px solid rgba(212,168,67,0.3)",
+                      border: "1px solid rgba(212,168,67,0.4)",
                     }}
                   >
-                    <ZoomIn size={22} className="text-amber-400" />
+                    <ZoomIn size={20} className="text-amber-400" />
                   </div>
                 </div>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Bottom info overlay */}
-            <div
-              className="absolute bottom-0 inset-x-0 z-20 p-4 sm:p-6 pointer-events-none"
-              style={{
-                background:
-                  "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)",
-              }}
-            >
-              <div className="flex items-end justify-between gap-4">
-                <div>
-                  <span
-                    className="inline-flex items-center text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full mb-2"
-                    style={{
-                      background: "rgba(212,168,67,0.18)",
-                      color: "#fde68a",
-                      border: "1px solid rgba(212,168,67,0.3)",
-                    }}
-                  >
-                    {photo.category}
-                  </span>
-                  <h3 className="font-serif text-base sm:text-xl font-bold text-amber-50 leading-snug">
-                    {photo.title}
-                  </h3>
-                  <p className="text-amber-200/55 text-xs mt-0.5">{photo.subtitle}</p>
-                </div>
-                <div className="text-amber-400/50 text-sm font-mono shrink-0">
-                  {String(current + 1).padStart(2, "0")}&thinsp;/&thinsp;{String(N).padStart(2, "0")}
-                </div>
-              </div>
-            </div>
-
-            {/* Autoplay progress bar */}
-            {autoPlaying && (
-              <motion.div
-                key={`progress-${current}`}
-                className="absolute bottom-0 left-0 h-[3px] z-30 rounded-full"
-                style={{
-                  background: "linear-gradient(90deg, #d4a843, #f59e0b, #fde68a)",
-                }}
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: AUTOPLAY_DELAY / 1000, ease: "linear" }}
-              />
-            )}
-
-            {/* ←  Prev arrow */}
-            <button
-              onClick={() => {
-                paginate(-1)
-                setAutoPlaying(false)
-              }}
-              aria-label="Previous photo"
-              className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
-              style={{
-                background: "rgba(0,0,0,0.48)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(212,168,67,0.22)",
-              }}
-            >
-              <ChevronLeft size={20} className="text-amber-300" />
-            </button>
-
-            {/* →  Next arrow */}
-            <button
-              onClick={() => {
-                paginate(1)
-                setAutoPlaying(false)
-              }}
-              aria-label="Next photo"
-              className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
-              style={{
-                background: "rgba(0,0,0,0.48)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(212,168,67,0.22)",
-              }}
-            >
-              <ChevronRight size={20} className="text-amber-300" />
-            </button>
-
-            {/* Play / Pause */}
-            <button
-              onClick={() => setAutoPlaying((p) => !p)}
-              aria-label={autoPlaying ? "Pause autoplay" : "Resume autoplay"}
-              className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 cursor-pointer"
-              style={{
-                background: "rgba(0,0,0,0.48)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(255,255,255,0.1)",
-              }}
-            >
-              {autoPlaying ? (
-                <Pause size={12} className="text-white/65" />
-              ) : (
-                <Play size={12} className="text-white/65 ml-0.5" />
-              )}
-            </button>
-          </div>
-
-          {/* Thumbnail strip */}
-          <div className="flex justify-center gap-2.5 sm:gap-3 mt-5">
-            {PHOTOS.map((p, i) => (
-              <motion.button
-                key={p.src}
-                onClick={() => {
-                  goTo(i)
-                  setAutoPlaying(false)
-                }}
-                whileHover={{ scale: 1.08, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="relative rounded-xl overflow-hidden shrink-0 cursor-pointer transition-all duration-300"
-                style={{
-                  width: 56,
-                  height: 42,
-                  outline:
-                    i === current
-                      ? "2px solid #d4a843"
-                      : "2px solid rgba(255,255,255,0.08)",
-                  outlineOffset: 2,
-                  opacity: i === current ? 1 : 0.4,
-                  boxShadow:
-                    i === current
-                      ? "0 4px 18px rgba(212,168,67,0.35)"
-                      : "none",
-                }}
-                aria-label={`View ${p.title}`}
-              >
-                <Image
-                  src={p.src}
-                  alt={p.title}
-                  fill
-                  className="object-cover"
-                  sizes="56px"
+                <div
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  style={{ boxShadow: "inset 0 0 0 2px rgba(212,168,67,0.55)" }}
                 />
-                {i === current && (
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, rgba(212,168,67,0.15), transparent)",
-                    }}
-                  />
-                )}
               </motion.button>
             ))}
           </div>
-
-          {/* Dot indicators */}
-          <div className="flex justify-center items-center gap-2 mt-4">
-            {PHOTOS.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => {
-                  goTo(i)
-                  setAutoPlaying(false)
-                }}
-                aria-label={`Go to photo ${i + 1}`}
-                className="cursor-pointer transition-all duration-300 rounded-full"
-                style={{
-                  width: i === current ? 28 : 6,
-                  height: 6,
-                  background:
-                    i === current
-                      ? "linear-gradient(90deg, #d4a843, #f59e0b)"
-                      : "rgba(255,255,255,0.18)",
-                }}
-              />
-            ))}
-          </div>
-        </motion.div>
+        )}
       </div>
 
-      {/* ── Lightbox ── */}
+      {/* ── Expanded view (shared-element morph) ── */}
       <AnimatePresence>
-        {lightbox && (
+        {activeImg && (
           <motion.div
+            key="overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.22 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-10"
-            style={{ background: "rgba(0,0,0,0.93)", backdropFilter: "blur(24px)" }}
-            onClick={() => setLightbox(false)}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-12"
+            style={{ background: "rgba(0,0,0,0.94)", backdropFilter: "blur(24px)" }}
+            onClick={close}
           >
+            {/* Counter */}
             <motion.div
-              initial={{ scale: 0.86, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.86, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 310, damping: 30 }}
-              className="relative max-w-4xl w-full"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 0.15 }}
+              className="absolute top-5 left-1/2 -translate-x-1/2 text-amber-300/70 text-sm font-mono"
             >
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                width={1200}
-                height={1600}
-                className="w-full h-auto rounded-3xl block"
-                style={{
-                  boxShadow:
-                    "0 48px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,168,67,0.18)",
-                }}
-                priority
-              />
-
-              {/* Caption */}
-              <div
-                className="absolute bottom-0 inset-x-0 p-5 rounded-b-3xl"
-                style={{
-                  background:
-                    "linear-gradient(to top, rgba(0,0,0,0.85), transparent)",
-                }}
-              >
-                <div className="font-serif text-lg sm:text-xl font-bold text-amber-50">
-                  {photo.title}
-                </div>
-                <div className="text-amber-300/65 text-sm mt-0.5">
-                  {photo.subtitle}
-                </div>
-              </div>
-
-              {/* Lightbox prev/next */}
-              <button
-                onClick={() => paginate(-1)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer"
-                style={{
-                  background: "rgba(0,0,0,0.6)",
-                  backdropFilter: "blur(8px)",
-                  border: "1px solid rgba(212,168,67,0.25)",
-                }}
-              >
-                <ChevronLeft size={18} className="text-amber-300" />
-              </button>
-              <button
-                onClick={() => paginate(1)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer"
-                style={{
-                  background: "rgba(0,0,0,0.6)",
-                  backdropFilter: "blur(8px)",
-                  border: "1px solid rgba(212,168,67,0.25)",
-                }}
-              >
-                <ChevronRight size={18} className="text-amber-300" />
-              </button>
-
-              {/* Close */}
-              <button
-                onClick={() => setLightbox(false)}
-                className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center text-white/70 hover:text-amber-400 transition-colors cursor-pointer"
-                style={{
-                  background: "rgba(0,0,0,0.6)",
-                  backdropFilter: "blur(8px)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                }}
-              >
-                <X size={16} />
-              </button>
+              {String(active! + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
             </motion.div>
+
+            {/* The morphing image */}
+            <motion.img
+              key={activeImg.src}
+              layoutId={`gal-${activeImg.src}`}
+              transition={morph}
+              src={activeImg.src}
+              alt={ALT}
+              onClick={(e) => e.stopPropagation()}
+              className="w-auto h-auto max-w-[94vw] max-h-[84vh] rounded-2xl block"
+              style={{
+                boxShadow:
+                  "0 48px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,168,67,0.2)",
+                cursor: "default",
+              }}
+            />
+
+            {/* Prev */}
+            {count > 1 && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ delay: 0.15 }}
+                onClick={(e) => { e.stopPropagation(); paginate(-1) }}
+                aria-label="Previous image"
+                className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform"
+                style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", border: "1px solid rgba(212,168,67,0.25)" }}
+              >
+                <ChevronLeft size={20} className="text-amber-300" />
+              </motion.button>
+            )}
+            {/* Next */}
+            {count > 1 && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ delay: 0.15 }}
+                onClick={(e) => { e.stopPropagation(); paginate(1) }}
+                aria-label="Next image"
+                className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform"
+                style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", border: "1px solid rgba(212,168,67,0.25)" }}
+              >
+                <ChevronRight size={20} className="text-amber-300" />
+              </motion.button>
+            )}
+
+            {/* Close */}
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={close}
+              aria-label="Close"
+              className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-white/70 hover:text-amber-400 transition-colors cursor-pointer"
+              style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)" }}
+            >
+              <X size={18} />
+            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>

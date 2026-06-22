@@ -4,6 +4,7 @@ import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight, Play, Music, Tv } from "lucide-react"
+import { RamBackground } from "@/components/decor/SacredBackground"
 import { kirtanPlaylist } from "@/data/kirtan-playlist"
 
 const PLAYLIST_URL =
@@ -64,8 +65,9 @@ export default function Kirtan() {
             "radial-gradient(ellipse 55% 45% at 0% 50%, rgba(212,168,67,0.06), transparent), radial-gradient(ellipse 55% 45% at 100% 50%, rgba(88,28,135,0.1), transparent)",
         }}
       />
+      <RamBackground variant="tiled" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* ── Header ── */}
         <motion.div

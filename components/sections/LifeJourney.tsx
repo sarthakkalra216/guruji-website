@@ -1,483 +1,281 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useSpring,
-  useMotionValueEvent,
-  type MotionValue,
-} from "framer-motion"
-import { useIsMobile } from "@/hooks/useIsMobile"
+import { useRef } from "react"
+import { motion, useScroll, useTransform } from "framer-motion"
+import { RamBackground, Lotus } from "@/components/decor/SacredBackground"
 
-// ── Scene data ──────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// संक्षिप्त जीवन परिचय — श्री श्री 108 स्वामी रामानन्द सरस्वती जी महाराज
+// (नकुड़ वाले बाबा जी)
+// स्रोत: public/about me/about me_extracted_text.txt — सम्पूर्ण सामग्री
+// ─────────────────────────────────────────────────────────────────────────────
 
-interface SceneData {
-  chapter: string
+interface Chapter {
   era: string
-  titleLine1: string
-  titleLine2: string
-  subtitle: string
-  quote: string
-  description: string
-  icon: string
-  gradient: string
-  accentColor: string
-  glowColor: string
+  year?: string
+  title: string
+  text: string
 }
 
-const SCENES: SceneData[] = [
+const CHAPTERS: Chapter[] = [
   {
-    chapter: "01", era: "Origin",
-    titleLine1: "A Divine Soul", titleLine2: "Enters the World",
-    subtitle: "Nakur, Saharanpur",
-    quote: "\"The soil of Nakur was chosen to receive his blessed footsteps.\"",
-    description: "In the sacred land of Nakur, Saharanpur, a child was born whose very presence would transform thousands of lives. From his earliest years, Guruji displayed an extraordinary stillness — an inexplicable light in his eyes and a compassion that seemed ageless, as though his soul had arrived with a mission already inscribed within it.",
-    icon: "🌅",
-    gradient: "radial-gradient(ellipse 110% 90% at 50% 0%, rgba(109,40,217,0.55) 0%, rgba(4,0,12,0.97) 70%)",
-    accentColor: "#a78bfa", glowColor: "rgba(124,58,237,0.35)",
+    era: "परिचय",
+    title: "समाज के पथ-प्रदर्शक",
+    text: "श्री श्री 108 स्वामी रामानन्द सरस्वती जी महाराज (नकुड़ वाले बाबा जी) समाज के लिए ऐसे पथ-प्रदर्शक थे जिनका नाम बड़े आदर के साथ लिया जाता है। जिन्होंने उनका नाम सुना, वे उनके दर्शनों के लिए उतावले रहते थे; और जो भी उनके सम्पर्क में आया या जिसने उनकी वाणी एक बार सुन ली, वह उनके पास से हटना ही नहीं चाहता था। यहाँ तक कि उनके दर्शन करके प्राणी उन्हीं की स्मृति में खोया रहता था।",
   },
   {
-    chapter: "02", era: "Awakening",
-    titleLine1: "The Divine Light", titleLine2: "Ignites Within",
-    subtitle: "Spiritual Revelation",
-    quote: "\"When the Guru awakens, the entire universe takes notice.\"",
-    description: "As Guruji grew, he was drawn into deep states of meditation and prayer that would last for hours. Visions, revelations, and an unshakeable sense of divine purpose became the compass of his life. The eternal flame that burned within him began to radiate outward — and those near him could feel its warmth and transforming power.",
-    icon: "🔥",
-    gradient: "radial-gradient(ellipse 110% 90% at 50% 15%, rgba(217,119,6,0.52) 0%, rgba(4,0,12,0.97) 68%)",
-    accentColor: "#fbbf24", glowColor: "rgba(217,119,6,0.38)",
+    era: "सिद्धांत",
+    title: "औरों के कल्याण का संकल्प",
+    text: "स्वामी जी का सिद्धांत था — 'औरों के कल्याण में रहता जिनका ध्यान, उनका अपने आप ही हो जाता कल्याण।' ये महापुरुष जीवन पर्यन्त सदैव दूसरों का कल्याण करते रहे — धर्मार्थ औषधालय बनवाना, बारात घर बनवाना, मन्दिर बनवाना, सत्संग भवन और विद्यालय बनवाना आदि। महाराज श्री समाज के प्रत्येक प्राणी को आपस में मिलाना चाहते थे; इनका कहना था कि मनुष्य पहले इन्सान है, बाद में हिन्दू या मुसलमान।",
   },
   {
-    chapter: "03", era: "Wisdom",
-    titleLine1: "Words That", titleLine2: "Transform Souls",
-    subtitle: "The Sacred Satsangs Begin",
-    quote: "\"The truth he spoke needed no translation — the heart understood.\"",
-    description: "Guruji began to share his wisdom — first in intimate gatherings, then in satsangs that drew hundreds. His teachings were not mere philosophy; they were living truth, delivered with a warmth that bypassed the mind and spoke directly to the heart. Seva, faith, and boundless love became the three pillars of his eternal message.",
-    icon: "📿",
-    gradient: "radial-gradient(ellipse 110% 90% at 50% 15%, rgba(15,118,110,0.48) 0%, rgba(4,0,12,0.97) 68%)",
-    accentColor: "#34d399", glowColor: "rgba(15,118,110,0.35)",
+    era: "अवतरण",
+    year: "1912",
+    title: "बामनौली में जन्म",
+    text: "भारतवर्ष के ये महान सन्त जिला बागपत के ग्राम बामनौली में अवतरित हुए। इनका अवतार शुभ तिथि चैत्र शुक्ल अष्टमी, सन् 1912 (सम्वत् 1968 वि०) को हुआ। इनके दादा श्री शीश राम जी बहुत न्यायप्रिय और परिश्रमी व्यक्ति थे। इनके पिता श्री गणेशी सिंह जी भी बड़े सज्जन व धार्मिक विचारों के व्यक्ति थे। इनकी माता जी श्रीमती भारती देवी, जो गाँव सरूरपुर की रहने वाली थीं, धार्मिक विचारों की सती-साध्वी स्त्री थीं, जिनमें प्रभु राम की भक्ति कूट-कूट कर भरी थी।",
   },
   {
-    chapter: "04", era: "Service",
-    titleLine1: "Serving the Divine", titleLine2: "in Every Soul",
-    subtitle: "Community & Compassion",
-    quote: "\"He saw the face of God in every hungry child, every weeping mother.\"",
-    description: "Guruji established a life of selfless service — langars that fed thousands, medical camps, and shelter for the vulnerable. The ashram at Nakur became a sanctuary where no one was turned away. He taught that God is most clearly seen in the face of one who suffers — and he embodied that truth with every breath he took.",
-    icon: "🙏",
-    gradient: "radial-gradient(ellipse 110% 90% at 50% 20%, rgba(190,18,60,0.42) 0%, rgba(4,0,12,0.97) 68%)",
-    accentColor: "#fb7185", glowColor: "rgba(190,18,60,0.33)",
+    era: "बचपन",
+    title: "जहान सिंह — दुखियों के सेवक",
+    text: "माता-पिता के ये संस्कार श्री स्वामी जी में भी धीरे-धीरे पल्लवित होते गए। स्वामी जी के बचपन का नाम जहान सिंह था। इनका हृदय सदैव दुखियों पर तरस खाता था और गुरुदेव सदैव उनकी सेवा किया करते थे।",
   },
   {
-    chapter: "05", era: "Presence",
-    titleLine1: "A Living Shelter", titleLine2: "for All Seekers",
-    subtitle: "Divine Grace & Protection",
-    quote: "\"In his presence, even the deepest doubt dissolves and faith is reborn.\"",
-    description: "Word of Guruji's grace spread far and wide. Devotees arrived from across India — each carrying their burdens, each leaving lighter. His darshan was not merely a meeting; it was a transformation. Through personal guidance, Guruji became the shelter that thousands had long been searching for, without knowing exactly what they sought.",
-    icon: "🕊️",
-    gradient: "radial-gradient(ellipse 110% 90% at 50% 15%, rgba(212,168,67,0.48) 0%, rgba(4,0,12,0.97) 68%)",
-    accentColor: "#d4a843", glowColor: "rgba(212,168,67,0.4)",
+    era: "गृहस्थ",
+    year: "1934",
+    title: "विवाह व पुत्र-जन्म",
+    text: "इनका विवाह गाँव कुरमाली के श्री हरख्याल जी की सुपुत्री भागीरथी देवी के साथ सन् 1934 ई० में हुआ था। सौभाग्य से भागीरथी देवी भी गंगा की तरह निर्मल मन वाली, सीधी-सादी व भोली-भाली महिला थीं। विवाह के दो वर्ष बाद, सन् 1936 में, उन्होंने एक पुत्र को जन्म दिया जिसका नाम जगपाल सिंह है।",
   },
   {
-    chapter: "06", era: "Legacy",
-    titleLine1: "The Journey", titleLine2: "Continues Forever",
-    subtitle: "An Eternal Flame",
-    quote: "\"His story is not the past — it is the living present, and the path forward.\"",
-    description: "Today, Guruji's mission burns brighter than ever. His teachings ripple across generations; his love is a lighthouse for all who seek meaning. The ashram at Nakur remains a living sanctuary of devotion, seva, and divine light. His path is not a historical record — it is a living invitation extended to every searching soul, in every age.",
-    icon: "✨",
-    gradient: "radial-gradient(ellipse 130% 110% at 50% 25%, rgba(88,28,135,0.52) 0%, rgba(212,168,67,0.1) 50%, rgba(4,0,12,0.97) 72%)",
-    accentColor: "#d4a843", glowColor: "rgba(212,168,67,0.45)",
+    era: "सेवा",
+    year: "1936",
+    title: "पुलिस विभाग में नौकरी",
+    text: "18 जनवरी 1936 को गुरुदेव को पुलिस विभाग में नौकरी मिली। सन् 1940 ई० के फरवरी माह में श्री स्वामी जी की धर्मपत्नी का स्वर्गवास हो गया। बालक जगपाल का लालन-पालन कठिनाई से हुआ — माता के बिना बच्चा उचित प्रकार से पोषित नहीं हो पाता।",
+  },
+  {
+    era: "राष्ट्रसेवा",
+    title: "नेताओं के साथ कर्तव्य",
+    text: "पुलिस की नौकरी करते हुए श्री महाराज जी भारत के अनेक स्थानों पर रहे व भ्रमण किया। आप राष्ट्रपिता महात्मा गांधी जी, श्री जवाहरलाल नेहरू जी, श्री राजेन्द्र प्रसाद और श्री लाल बहादुर शास्त्री जी आदि नेताओं के पास ड्यूटी पर रहे।",
+  },
+  {
+    era: "जागरण",
+    year: "1949–50",
+    title: "पथ-प्रदर्शकों से भेंट",
+    text: "धीरे-धीरे माता द्वारा भरे हुए रामभक्ति के संस्कार प्रस्फुटित हुए और धार्मिक विचार जागृत हो गए। कानपुर में रहते हुए सन् 1949-50 में श्री गंभीरानन्द जी व श्री रामशंकर जी पाठक से आपकी मुलाकात हुई, जो बनारस के रहने वाले थे; वे ही गुरुदेव के पथ-प्रदर्शक बने।",
+  },
+  {
+    era: "ख्याति",
+    year: "1953–54",
+    title: "रामायण-प्रवचन व 'बाबा' खिताब",
+    text: "फिर सहारनपुर में रहते हुए इन्होंने मेला गुघाल से रामायण खरीदी और 1953-54 में पुलिस लाइन में रामायण पर बोलना प्रारम्भ कर दिया। धीरे-धीरे इनकी ख्याति बढ़ने लगी। अधिकारी गण भी इनके द्वारा पढ़ी गई रामायण को सुनते थे व इनके विचारों से बहुत प्रभावित रहने लगे। ड्यूटी पर भी अधिकारी गण इन्हें वर्दी पहनने के लिए बाध्य नहीं करते थे। 'बाबा' का खिताब भी इन्हें पुलिस विभाग से ही मिला।",
+  },
+  {
+    era: "निष्काम कर्म",
+    title: "कर्तव्य व राम-कृपा",
+    text: "पुलिस विभाग में रहते हुए भी इन्होंने न कभी किसी को गाली दी, न ही कभी ली, तथा कभी भी अपने कर्तव्य की अवहेलना नहीं की। इसी कारण से कठिन समय में भी प्रभु राम ने सदैव इनकी रक्षा की व सम्मान रखा।",
+  },
+  {
+    era: "भक्ति",
+    title: "राम-नाम की रूप-माधुरी में लीन",
+    text: "धीरे-धीरे ये प्रभु राम के अनन्य भक्त बन गए। ध्यान करते-करते ये प्रभु श्री राम की रूप-माधुरी में ऐसे लीन हो जाते थे कि इन्हें आस-पास की कुछ सुध-बुध नहीं रहती थी। इनका अधिकांश समय रामायण पढ़ने में, प्रभु श्री राम जी का ध्यान करने व प्रवचन करने में ही बीतने लगा।",
+  },
+  {
+    era: "प्रवचन",
+    year: "1960",
+    title: "हर बाधा से ऊपर निःस्वार्थ सेवा",
+    text: "इनके प्रवचनों में धूप, गर्मी, सर्दी, वर्षा, ओले — कभी भी बाधक नहीं बन सके; रात के एक बजे वर्षा में भी बाहर के गाँवों में प्रवचन करके आते थे। इनके प्रवचन निःस्वार्थ व अत्यंत उपदेशात्मक होते थे। श्री महाराज जी ने जीवन पर्यन्त किसी से कोई पाई-पैसा नहीं लिया और समाज की निःस्वार्थ सेवा की। नकुड़ में रहते हुए जनवरी 1960 में इन्होंने पुलिस की सेवा से निवृत्ति ले ली।",
+  },
+  {
+    era: "संन्यास",
+    year: "1981",
+    title: "श्री रामानन्द सरस्वती नामकरण",
+    text: "इन्होंने संसार को निःसार समझा और दिनांक 5 सितम्बर 1981 (ऋषि पंचमी) को हरिद्वार में श्री नारायण मुनि जी महाराज चतुर्वेदी जी से संन्यास की दीक्षा ग्रहण की। श्री नारायण मुनि जी भी स्वामी जी की राम भक्ति व विचारों से बहुत प्रभावित हुए, इसीलिए उन्होंने स्वामी जी का नाम 'श्री रामानन्द सरस्वती' रखा। श्री स्वामी जी के त्याग, तपस्या व संयम से सभी लोग अत्यंत प्रभावित होते थे।",
+  },
+  {
+    era: "स्वरूप",
+    title: "ज्ञानी व करुणामय गुरुदेव",
+    text: "गुरुदेव बहुत ही ज्ञानी, प्रसन्नचित्त, विद्वान, मनोविनोदी व दीन-दुखियों की सहायता करने वाले थे। उनकी छत्रछाया उनके शिष्यों पर इस प्रकार थी, जैसे उनके सिर पर स्वयं परमपिता परमात्मा का हाथ हो। परंतु श्री महाराज जी के कथनानुसार — संसार में ऐसी कोई जीवन-ज्योति नहीं जो प्रकाशित होकर बुझ न गई हो।",
+  },
+  {
+    era: "महासमाधि",
+    year: "2003",
+    title: "प्रभु श्री राम में लीन",
+    text: "15 जनवरी 2003 की ऐसी शाम आई कि महाराज श्री के शिष्यों पर गहरा वज्रपात हुआ। पौष शुक्ल पक्ष द्वादशी, मकर राशि, बुधवार, रोहिणी नक्षत्र में सायं 5.55 बजे श्री महाराज जी प्रभु श्री राम के ध्यान में ऐसे खोये कि प्रभु श्री राम में ही लीन हो गए। 16 जनवरी, पौष शुक्ल त्रयोदशी, गुरुवार, मृगशिरा नक्षत्र को सायंकाल 4.30 बजे पन्तविहार स्थित श्री सरस्वती सत्संग भवन में गुरुदेव को भू-समाधि दी गई।",
+  },
+  {
+    era: "अमर विरासत",
+    title: "नाम व रूप-माधुरी अमिट",
+    text: "आज भी श्री महाराज जी का नाम व रूप-माधुरी उनके भक्तों व शिष्यों के हृदय-पटल पर अंकित है, जो सदैव अमिट रहेगा। धन्य हैं ऐसे महान सन्त, जिनका अवतार केवल जग की भलाई के लिए हुआ। किसी ने ठीक ही कहा है — 'परोपकाराय सतां विभूतयः।'",
+  },
+  {
+    era: "उत्तराधिकार",
+    title: "सन्त देवी सुदीक्षा सरस्वती जी",
+    text: "अब उनकी सद् शिष्या व उत्तराधिकारिणी श्री श्री 108 सन्त देवी सुदीक्षा सरस्वती जी — वेद-शास्त्रों में प्रवीण, सन्त समाज में प्रतिष्ठित, परमार्थ-व्यवहार में कुशल, शालीनता व नम्रता की मूर्ति, गुरुचरणानुरागी व सच्ची श्रद्धालु — सेवा, त्याग, कर्म, भक्ति व ज्ञान के सुन्दर समन्वित स्वरूप में, पूज्य सद्गुरुदेव जी के चरण-चिह्नों पर चलते हुए, इन सभी स्थानों पर अमृत-वर्षा करते हुए और उनके द्वारा लगाए गए वृक्षों को सींचते हुए जनता-जनार्दन का कल्याण कर रही हैं।",
   },
 ]
 
-const TOTAL = SCENES.length
+// 3D scroll-driven timeline card — tilts up as it rises into view and tilts
+// down as it leaves, giving a sense of depth while scrolling down the journey.
+function JourneyCard({ ch }: { ch: Chapter }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  })
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// MOBILE VERSION — lightweight stacked cards, no scroll-driven animations
-// ═══════════════════════════════════════════════════════════════════════════════
+  const rotateX = useTransform(scrollYProgress, [0, 0.5, 1], [18, 0, -14])
+  const y = useTransform(scrollYProgress, [0, 0.5, 1], [70, 0, -45])
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.9, 1, 0.95])
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.85, 1], [0.2, 1, 1, 0.35])
 
-function MobileLifeJourney() {
   return (
-    <section id="life-journey" className="relative py-20 overflow-hidden">
+    <div ref={ref} className="relative pl-12 sm:pl-16">
+      {/* Node (stays flat on the rail) */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute top-3 left-[12px] sm:left-5 w-3.5 h-3.5 rounded-full z-10"
         style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(88,28,135,0.18), transparent)",
+          background: "#04000c",
+          border: "2px solid #d4a843",
+          boxShadow: "0 0 12px rgba(212,168,67,0.6)",
         }}
       />
 
-      <div className="relative max-w-lg mx-auto px-5">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
-          <span className="text-amber-400 text-xs font-semibold uppercase tracking-[0.25em]">
-            Spiritual Journey
+      <motion.div
+        style={{
+          rotateX,
+          y,
+          scale,
+          opacity,
+          transformPerspective: 1200,
+          transformOrigin: "center top",
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(212,168,67,0.16)",
+          backdropFilter: "blur(12px)",
+        }}
+        className="rounded-2xl p-5 sm:p-6 will-change-transform"
+      >
+        <div className="flex items-center gap-3 mb-2 flex-wrap">
+          <span
+            className="text-[10px] font-semibold uppercase tracking-[0.2em] px-2.5 py-1 rounded-full"
+            style={{
+              background: "rgba(212,168,67,0.1)",
+              border: "1px solid rgba(212,168,67,0.25)",
+              color: "#fde68a",
+            }}
+            lang="hi"
+          >
+            {ch.era}
           </span>
-          <h2 className="mt-3 font-serif text-3xl font-bold text-amber-50">
-            Life <span className="gold-text">Journey</span>
-          </h2>
-          <p className="mt-3 text-amber-200/45 text-sm leading-relaxed">
-            Six chapters of grace, wisdom, and divine service
-          </p>
-          <div className="section-divider mt-4" />
-        </motion.div>
-
-        {/* Cards */}
-        <div className="relative">
-          {/* Vertical connector line */}
-          <div
-            className="absolute left-5 top-0 bottom-0 w-px"
-            style={{ background: "linear-gradient(to bottom, transparent, rgba(212,168,67,0.25), transparent)" }}
-          />
-
-          <div className="space-y-8 pl-14">
-            {SCENES.map((s, i) => (
-              <motion.div
-                key={s.chapter}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.45, delay: 0.05 * i }}
-              >
-                {/* Dot on the line */}
-                <div
-                  className="absolute left-[14px] w-3 h-3 rounded-full border-2 mt-4"
-                  style={{
-                    borderColor: s.accentColor,
-                    background: "#04000c",
-                    boxShadow: `0 0 8px ${s.accentColor}60`,
-                    marginTop: "1.25rem",
-                  }}
-                />
-
-                {/* Card */}
-                <div
-                  className="rounded-2xl p-5"
-                  style={{
-                    background: "rgba(255,255,255,0.03)",
-                    border: `1px solid ${s.accentColor}22`,
-                  }}
-                >
-                  {/* Chapter + era */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-2xl">{s.icon}</span>
-                    <span
-                      className="text-[10px] font-mono font-bold uppercase tracking-widest"
-                      style={{ color: s.accentColor }}
-                    >
-                      {s.chapter} / {s.era}
-                    </span>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="font-serif font-bold leading-tight mb-1">
-                    <span className="block text-lg text-amber-50">{s.titleLine1}</span>
-                    <span className="block text-lg" style={{ color: s.accentColor }}>
-                      {s.titleLine2}
-                    </span>
-                  </h3>
-
-                  {/* Quote */}
-                  <p
-                    className="text-xs italic mt-3 mb-2 leading-relaxed"
-                    style={{ color: `${s.accentColor}cc` }}
-                  >
-                    {s.quote}
-                  </p>
-
-                  {/* Description */}
-                  <p className="text-amber-100/55 text-xs leading-relaxed">
-                    {s.description}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          {ch.year && (
+            <span className="font-serif text-xl font-bold gold-text">{ch.year}</span>
+          )}
         </div>
-      </div>
-    </section>
-  )
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// DESKTOP VERSION — full Apple-style sticky scroll (unchanged)
-// ═══════════════════════════════════════════════════════════════════════════════
-
-interface Pt {
-  x: number; y: number; size: number; opacity: number
-  dur: number; delay: number; color: string
-}
-
-const PT_COLORS = [
-  "rgba(212,168,67,0.65)",
-  "rgba(167,139,250,0.5)",
-  "rgba(255,255,255,0.4)",
-  "rgba(251,191,36,0.55)",
-  "rgba(196,181,253,0.45)",
-]
-
-function ParticleField() {
-  const [pts, setPts] = useState<Pt[]>([])
-  useEffect(() => {
-    setPts(
-      Array.from({ length: 18 }, () => ({   // reduced from 26 → 18
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: 1.5 + Math.random() * 3,
-        opacity: 0.1 + Math.random() * 0.4,
-        dur: 4 + Math.random() * 5,
-        delay: Math.random() * 4,
-        color: PT_COLORS[Math.floor(Math.random() * PT_COLORS.length)],
-      }))
-    )
-  }, [])
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden z-[1]">
-      {pts.map((p, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            left: `${p.x}%`, top: `${p.y}%`,
-            width: p.size, height: p.size,
-            backgroundColor: p.color,
-          }}
-          animate={{ y: [-14, 14], x: [-4, 4], opacity: [p.opacity * 0.35, p.opacity, p.opacity * 0.35] }}
-          transition={{ duration: p.dur, repeat: Infinity, repeatType: "reverse", delay: p.delay }}
-        />
-      ))}
+        <h3
+          className="font-serif text-lg sm:text-xl font-semibold text-amber-50 mb-2"
+          lang="hi"
+        >
+          {ch.title}
+        </h3>
+        <p className="text-amber-100/70 text-[0.95rem] sm:text-base leading-8" lang="hi">
+          {ch.text}
+        </p>
+      </motion.div>
     </div>
   )
 }
 
-function ProgressIndicator({ progress }: { progress: MotionValue<number> }) {
-  const [active, setActive] = useState(0)
-  useMotionValueEvent(progress, "change", (v) => {
-    setActive(Math.min(Math.floor(v * TOTAL), TOTAL - 1))
-  })
+export default function LifeJourney() {
   return (
-    <>
-      <div className="hidden sm:flex absolute right-6 lg:right-8 top-1/2 -translate-y-1/2 z-40 flex-col items-center gap-2.5">
-        {SCENES.map((_, i) => (
-          <motion.div
-            key={i}
-            animate={{ height: i === active ? 30 : 6, opacity: i === active ? 1 : 0.28 }}
-            transition={{ duration: 0.38 }}
-            className="rounded-full"
-            style={{
-              width: 3,
-              background: i === active ? "linear-gradient(to bottom, #f59e0b, #d4a843)" : "rgba(255,255,255,0.45)",
-            }}
-          />
-        ))}
-      </div>
-      <div className="flex sm:hidden absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 z-40 gap-2 items-center">
-        {SCENES.map((_, i) => (
-          <motion.div
-            key={i}
-            animate={{ width: i === active ? 22 : 6, opacity: i === active ? 1 : 0.28 }}
-            transition={{ duration: 0.38 }}
-            className="rounded-full"
-            style={{
-              height: 3,
-              background: i === active ? "linear-gradient(90deg, #f59e0b, #d4a843)" : "rgba(255,255,255,0.45)",
-            }}
-          />
-        ))}
-      </div>
-    </>
-  )
-}
-
-function Scene({ data, progress, index }: { data: SceneData; progress: MotionValue<number>; index: number }) {
-  const start  = index / TOTAL
-  const end    = (index + 1) / TOTAL
-  const enter  = start + 0.022
-  const settle = start + 0.055
-  const leave  = end - 0.022
-
-  const opacity = useTransform(progress, [start, enter, leave, end], [0, 1, 1, 0])
-  const scale   = useTransform(progress, [start, settle, leave, end], [0.88, 1, 1.04, 1.08])
-  const rotateX = useTransform(progress, [start, settle, leave, end], [7, 0, 0, -4])
-  const glowY   = useTransform(progress, [start, end], [60, -60])
-  const glowOp  = useTransform(progress, [start, (start + end) / 2, end], [0.15, 0.7, 0.15])
-  const titleY  = useTransform(progress, [start, settle, leave], [100, 0, -32])
-  const titleOp = useTransform(progress, [start, enter + 0.01, leave, end], [0, 1, 0.95, 0])
-  const cardX   = useTransform(progress, [start, settle + 0.012, leave], [80, 0, -22])
-  const cardOp  = useTransform(progress, [start, settle + 0.005, leave, end], [0, 1, 0.95, 0])
-  const numY    = useTransform(progress, [start, end], [50, -50])
-  const lineW   = useTransform(progress, [enter, settle], ["0%", "100%"])
-
-  return (
-    <motion.div
-      style={{
-        opacity, scale, rotateX, transformPerspective: 1400,
-        position: "absolute", inset: 0,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        zIndex: 10,
-      }}
-    >
-      <div className="absolute inset-0" style={{ background: data.gradient }} />
-
-      <motion.div
-        style={{ y: glowY, opacity: glowOp }}
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-      >
-        <div
-          className="w-[55vw] h-[55vh] rounded-full"
-          style={{ background: data.glowColor, filter: "blur(80px)" }}
-        />
-      </motion.div>
-
+    <section id="life-journey" className="relative py-24 sm:py-32 overflow-hidden">
+      {/* Section glow */}
       <div
-        className="absolute inset-x-0 top-0 h-64 pointer-events-none"
-        style={{ background: `linear-gradient(to bottom, ${data.glowColor.replace(/[\d.]+\)$/, "0.1)")}, transparent)` }}
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(88,28,135,0.16), transparent), radial-gradient(ellipse 50% 45% at 50% 100%, rgba(212,168,67,0.05), transparent)",
+        }}
       />
+      {/* Sacred राम vertical watermark */}
+      <RamBackground variant="vertical" opacity={0.3} />
 
-      <motion.div
-        style={{ y: numY }}
-        aria-hidden
-        className="absolute bottom-12 sm:bottom-16 right-2 sm:right-6 pointer-events-none select-none font-serif font-black leading-none"
-      >
-        <span
-          className="text-[28vw] sm:text-[18vw] lg:text-[15vw]"
-          style={{ color: data.accentColor, opacity: 0.045 }}
-        >
-          {data.chapter}
-        </span>
-      </motion.div>
-
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-10 lg:px-14">
-        <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-16 items-center">
-
-          <motion.div style={{ y: titleY, opacity: titleOp }}>
-            <div className="flex items-center gap-3 mb-5 sm:mb-6">
-              <span className="font-mono text-[10px] sm:text-xs tracking-[0.38em] uppercase font-bold" style={{ color: data.accentColor }}>
-                {data.chapter}&ensp;/&ensp;{data.era}
-              </span>
-              <div className="flex-1 h-px overflow-hidden" style={{ maxWidth: 56 }}>
-                <motion.div style={{ width: lineW, background: `${data.accentColor}55`, height: 1 }} />
-              </div>
-            </div>
-
-            <motion.span
-              className="inline-block text-4xl sm:text-5xl mb-5"
-              animate={{ rotate: [0, 3, -3, 0], y: [0, -4, 0] }}
-              transition={{ duration: 5, repeat: Infinity, repeatType: "mirror" }}
-            >
-              {data.icon}
-            </motion.span>
-
-            <h3 className="font-serif font-bold leading-[1.06] mb-4">
-              <span className="block text-3xl sm:text-4xl lg:text-5xl xl:text-6xl" style={{ color: "#fef9f0" }}>
-                {data.titleLine1}
-              </span>
-              <span className="block text-3xl sm:text-4xl lg:text-5xl xl:text-6xl" style={{ color: data.accentColor }}>
-                {data.titleLine2}
-              </span>
-            </h3>
-
-            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.32em]" style={{ color: `${data.accentColor}70` }}>
-              {data.subtitle}
-            </p>
-          </motion.div>
-
-          <motion.div style={{ x: cardX, opacity: cardOp }}>
-            <div
-              className="rounded-3xl p-6 sm:p-8 lg:p-9"
-              style={{
-                background: "rgba(255,255,255,0.032)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-                border: `1px solid ${data.accentColor}26`,
-                boxShadow: `0 40px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07)`,
-              }}
-            >
-              <blockquote className="font-serif text-sm sm:text-base lg:text-lg italic leading-relaxed mb-5" style={{ color: data.accentColor }}>
-                {data.quote}
-              </blockquote>
-              <div className="h-px mb-5" style={{ background: `linear-gradient(90deg, ${data.accentColor}40, transparent)` }} />
-              <p className="text-amber-100/62 text-sm sm:text-[0.95rem] leading-[1.88]">{data.description}</p>
-              <div className="flex items-center justify-between mt-5 pt-4" style={{ borderTop: `1px solid ${data.accentColor}15` }}>
-                <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.32em] opacity-35" style={{ color: data.accentColor }}>
-                  Chapter {data.chapter} of {TOTAL}
-                </span>
-                <span className="text-amber-400/20 text-lg">✦</span>
-              </div>
-            </div>
-          </motion.div>
-
-        </div>
-      </div>
-    </motion.div>
-  )
-}
-
-function DesktopLifeJourney() {
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  })
-
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 85, damping: 24, restDelta: 0.001,
-  })
-
-  const headerOp = useTransform(scrollYProgress, [0, 0.055], [1, 0])
-  const headerY  = useTransform(scrollYProgress, [0, 0.055], [0, -44])
-  const hintOp   = useTransform(scrollYProgress, [0, 0.035], [1, 0])
-
-  return (
-    <section id="life-journey" ref={containerRef} className="relative" style={{ height: "600vh" }}>
-      <div className="sticky top-0 h-screen overflow-hidden" style={{ transform: "translateZ(0)" }}>
-        <div className="absolute inset-0 bg-[#04000c]" />
-        <ParticleField />
-
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
         <motion.div
-          style={{ opacity: headerOp, y: headerY }}
-          className="absolute inset-x-0 top-[15vh] z-20 text-center px-6 pointer-events-none"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.7 }}
+          className="text-center mb-4"
         >
-          <span className="text-amber-400 text-xs font-semibold uppercase tracking-[0.3em]">Spiritual Journey</span>
-          <h2 className="mt-3 font-serif text-4xl sm:text-6xl lg:text-7xl font-bold text-amber-50">
-            Life <span className="gold-text">Journey</span>
+          <span className="text-amber-400 text-xs font-semibold uppercase tracking-[0.25em]">
+            संक्षिप्त जीवन परिचय
+          </span>
+          <h2 className="mt-3 font-serif text-3xl sm:text-5xl font-bold text-amber-50">
+            <span className="gold-text">जीवन</span> यात्रा
           </h2>
-          <p className="mt-3 text-amber-200/45 text-sm max-w-sm mx-auto leading-relaxed">
-            Six chapters of grace, wisdom, and divine service
+          <p className="mt-4 ram-glyph text-base sm:text-lg" style={{ opacity: 0.85 }}>
+            श्री श्री 108 स्वामी रामानन्द सरस्वती जी महाराज — नकुड़ वाले बाबा जी
           </p>
-          <div className="section-divider mt-5" />
+          <div className="flex justify-center mt-5">
+            <Lotus className="w-24 h-14 opacity-50" />
+          </div>
         </motion.div>
 
-        {SCENES.map((scene, i) => (
-          <Scene key={scene.chapter} data={scene} progress={smoothProgress} index={i} />
-        ))}
-
-        <ProgressIndicator progress={smoothProgress} />
-
-        <motion.div
-          style={{ opacity: hintOp }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2 pointer-events-none"
+        {/* Guiding principle */}
+        <motion.blockquote
+          initial={{ opacity: 0, scale: 0.97 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="relative mx-auto mb-16 max-w-2xl rounded-2xl px-6 py-7 text-center"
+          style={{
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(212,168,67,0.2)",
+            backdropFilter: "blur(14px)",
+          }}
         >
-          <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.3em] text-amber-400/45">Scroll to journey</span>
-          <motion.div animate={{ y: [0, 7, 0] }} transition={{ duration: 1.5, repeat: Infinity }} className="text-amber-400/35 text-base">
-            ↓
-          </motion.div>
+          <p
+            className="font-serif text-lg sm:text-2xl text-amber-300/90 italic leading-relaxed"
+            lang="hi"
+          >
+            ॥ औरों के कल्याण में रहता जिनका ध्यान,
+            <br className="hidden sm:block" /> उनका अपने आप ही हो जाता कल्याण ॥
+          </p>
+        </motion.blockquote>
+
+        {/* Timeline */}
+        <div className="relative">
+          {/* Vertical rail */}
+          <div
+            className="absolute left-[18px] sm:left-6 top-2 bottom-2 w-px"
+            style={{
+              background:
+                "linear-gradient(to bottom, transparent, rgba(212,168,67,0.5), rgba(212,168,67,0.5), transparent)",
+            }}
+          />
+
+          <div className="space-y-7" style={{ perspective: "1200px" }}>
+            {CHAPTERS.map((ch, i) => (
+              <JourneyCard key={i} ch={ch} />
+            ))}
+          </div>
+        </div>
+
+        {/* Closing seal */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="mt-16 text-center"
+        >
+          <p className="ram-glyph text-2xl sm:text-3xl mb-3" style={{ opacity: 0.9 }}>
+            ॥ परोपकाराय सतां विभूतयः ॥
+          </p>
+          <p className="text-amber-200/45 text-sm" lang="hi">
+            — संतों की विभूतियाँ परोपकार के लिए ही होती हैं
+          </p>
         </motion.div>
       </div>
     </section>
   )
-}
-
-// ── Root: branches on screen size ───────────────────────────────────────────
-
-export default function LifeJourney() {
-  const isMobile = useIsMobile()
-  return isMobile ? <MobileLifeJourney /> : <DesktopLifeJourney />
 }

@@ -96,3 +96,80 @@ body {
 }
 .marquee-left { animation: marquee-left 35s linear infinite; }
 .marquee-right { animation: marquee-right 35s linear infinite; }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Sacred "राम" background pattern system
+   Premium temple-inspired watermark motifs. Always background-layer only,
+   pointer-events-none, very low opacity (3%–8%). Never affects readability.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Elegant Devanagari display face for Hindi headings */
+.font-hindi {
+  font-family: var(--font-devanagari), "Noto Serif Devanagari", "Tiro Devanagari Hindi",
+    serif;
+}
+
+/* Devanagari watermark face — falls back gracefully to system Devanagari */
+.ram-glyph {
+  font-family: var(--font-devanagari), "Noto Serif Devanagari", "Noto Sans Devanagari",
+    "Tiro Devanagari Hindi", serif;
+  font-weight: 700;
+  color: #e9c46a;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* Gold gradient version for hero calligraphy */
+.ram-glyph-gold {
+  background: linear-gradient(135deg, #fde68a 0%, #f5b942 40%, #d4a843 70%, #b45309 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Very slow vertical float */
+@keyframes ram-float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-22px); }
+}
+/* Soft glow / opacity breathing */
+@keyframes ram-breathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+/* Continuous vertical scroll (footer / vertical columns) */
+@keyframes ram-scroll-y {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+/* Slow rotation for mandalas */
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes spin-slow-rev { to { transform: rotate(-360deg); } }
+
+/* Glow pulse — opacity breathes 0.1 → 0.5 over 1.5s (each direction) */
+@keyframes ram-glow-pulse {
+  from { opacity: 0.1; }
+  to { opacity: 0.5; }
+}
+
+.ram-float-y { animation: ram-float-y 14s ease-in-out infinite; }
+.ram-breathe { animation: ram-breathe 9s ease-in-out infinite; }
+.ram-scroll-y { animation: ram-scroll-y 60s linear infinite; }
+.ram-glow-pulse { animation: ram-glow-pulse 1.5s ease-in-out infinite alternate; }
+.spin-slow { animation: spin-slow 90s linear infinite; }
+.spin-slow-rev { animation: spin-slow-rev 120s linear infinite; }
+
+/* Respect user motion preferences — keep watermarks, drop animation */
+@media (prefers-reduced-motion: reduce) {
+  .ram-float-y,
+  .ram-breathe,
+  .ram-scroll-y,
+  .ram-glow-pulse,
+  .spin-slow,
+  .spin-slow-rev,
+  .marquee-left,
+  .marquee-right {
+    animation: none !important;
+  }
+}

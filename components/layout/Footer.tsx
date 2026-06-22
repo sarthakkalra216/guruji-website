@@ -1,20 +1,35 @@
-import { gurujiProfile } from "@/data/guruji-profile"
+import NextLink from "next/link"
 import { Tv, ExternalLink, Link } from "lucide-react"
+import { RamBackground } from "@/components/decor/SacredBackground"
+
+const LOCATION = "Nakur, Saharanpur, Uttar Pradesh"
+
+const CONTACT = {
+  address: "Shri Guruji Ashram, Nakur, District Saharanpur, Uttar Pradesh — 247341",
+  phone: "+91 XXXXX XXXXX",
+  email: "info@gurujinakurwale.com",
+}
+
+const SOCIAL = {
+  youtube: "https://youtube.com/@GurujNakurWale",
+  facebook: "https://facebook.com/GurujNakurWale",
+  instagram: "https://instagram.com/GurujNakurWale",
+}
 
 const NAV = [
-  { label: "About Guruji", href: "#about" },
-  { label: "Teachings", href: "#teachings" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Kirtan", href: "#kirtan" },
-  { label: "Seva", href: "#seva" },
-  { label: "Ask Guruji", href: "#ask-guruji" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/" },
+  { label: "About Guruji", href: "/#about" },
+  { label: "Life Journey", href: "/#life-journey" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Videos", href: "/videos" },
+  { label: "Seva", href: "/seva" },
+  { label: "Contact", href: "/contact" },
 ]
 
 export default function Footer() {
   return (
     <footer
-      className="relative border-t"
+      className="relative overflow-hidden border-t"
       style={{ borderColor: "rgba(255,255,255,0.06)" }}
     >
       {/* Top glow */}
@@ -24,8 +39,10 @@ export default function Footer() {
           background: "linear-gradient(90deg,transparent,rgba(212,168,67,0.3),transparent)",
         }}
       />
+      {/* Continuous राम राम राम watermark */}
+      <RamBackground variant="marquee" opacity={0.05} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="lg:col-span-2">
@@ -36,19 +53,20 @@ export default function Footer() {
                   Guruji Nakur Wale Baba Ji
                 </div>
                 <div className="text-xs text-amber-200/40 uppercase tracking-widest">
-                  {gurujiProfile.location}
+                  {LOCATION}
                 </div>
               </div>
             </div>
             <p className="text-amber-100/50 text-sm leading-relaxed max-w-xs mb-6">
-              {gurujiProfile.shortBio.slice(0, 120)}…
+              A sacred space for satsang, kirtan, seva, and devotion — open to all
+              seekers of divine love and inner peace.
             </p>
             {/* Social */}
             <div className="flex gap-3">
               {[
-                { icon: <Tv size={18} />, href: gurujiProfile.social.youtube, label: "YouTube" },
-                { icon: <Link size={18} />, href: gurujiProfile.social.facebook, label: "Facebook" },
-                { icon: <ExternalLink size={18} />, href: gurujiProfile.social.instagram, label: "Instagram" },
+                { icon: <Tv size={18} />, href: SOCIAL.youtube, label: "YouTube" },
+                { icon: <Link size={18} />, href: SOCIAL.facebook, label: "Facebook" },
+                { icon: <ExternalLink size={18} />, href: SOCIAL.instagram, label: "Instagram" },
               ].map((s) => (
                 <a
                   key={s.label}
@@ -73,12 +91,12 @@ export default function Footer() {
             <ul className="space-y-2.5">
               {NAV.map((l) => (
                 <li key={l.href}>
-                  <a
+                  <NextLink
                     href={l.href}
                     className="text-amber-100/55 text-sm hover:text-amber-400 transition-colors"
                   >
                     {l.label}
-                  </a>
+                  </NextLink>
                 </li>
               ))}
             </ul>
@@ -90,40 +108,18 @@ export default function Footer() {
               Contact
             </h3>
             <address className="not-italic space-y-3 text-sm text-amber-100/55">
-              <p>{gurujiProfile.contact.address}</p>
+              <p>{CONTACT.address}</p>
               <p>
-                <a href={`tel:${gurujiProfile.contact.phone}`} className="hover:text-amber-400 transition-colors">
-                  {gurujiProfile.contact.phone}
+                <a href={`tel:${CONTACT.phone}`} className="hover:text-amber-400 transition-colors">
+                  {CONTACT.phone}
                 </a>
               </p>
               <p>
-                <a href={`mailto:${gurujiProfile.contact.email}`} className="hover:text-amber-400 transition-colors">
-                  {gurujiProfile.contact.email}
+                <a href={`mailto:${CONTACT.email}`} className="hover:text-amber-400 transition-colors">
+                  {CONTACT.email}
                 </a>
               </p>
             </address>
-
-            {/* Values */}
-            <div className="mt-6">
-              <h3 className="text-amber-400 text-xs font-semibold uppercase tracking-widest mb-3">
-                Core Values
-              </h3>
-              <div className="flex flex-wrap gap-1.5">
-                {gurujiProfile.values.slice(0, 4).map((v) => (
-                  <span
-                    key={v}
-                    className="text-[10px] px-2 py-0.5 rounded-full"
-                    style={{
-                      background: "rgba(212,168,67,0.08)",
-                      border: "1px solid rgba(212,168,67,0.15)",
-                      color: "#fde68a",
-                    }}
-                  >
-                    {v}
-                  </span>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
 

@@ -1,7 +1,9 @@
 "use client"
 
+import Link from "next/link"
 import { motion } from "framer-motion"
 import { Utensils, BookOpen, HeartPulse, Home, Leaf, IndianRupee, ArrowRight } from "lucide-react"
+import { RamBackground } from "@/components/decor/SacredBackground"
 
 interface SevaItem {
   id: number
@@ -92,8 +94,10 @@ export default function Seva() {
             "radial-gradient(ellipse 65% 55% at 50% 100%, rgba(16,185,129,0.06), transparent), radial-gradient(ellipse 40% 35% at 100% 0%, rgba(88,28,135,0.1), transparent)",
         }}
       />
+      {/* Sacred mandala + राम watermark */}
+      <RamBackground variant="mandala" opacity={0.06} />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial="hidden"
@@ -179,12 +183,8 @@ export default function Seva() {
               </div>
 
               {/* CTA */}
-              <button
-                onClick={() =>
-                  document
-                    .querySelector("#contact")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
+              <Link
+                href="/contact"
                 className="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-amber-400 hover:text-amber-300 transition-colors group/btn cursor-pointer"
               >
                 Join this Seva
@@ -192,7 +192,7 @@ export default function Seva() {
                   size={15}
                   className="transition-transform duration-300 group-hover/btn:translate-x-1"
                 />
-              </button>
+              </Link>
             </motion.div>
           ))}
         </motion.div>
