@@ -1,11 +1,11 @@
+"use client"
+
 import NextLink from "next/link"
 import { Tv, ExternalLink, Link } from "lucide-react"
 import { RamBackground } from "@/components/decor/SacredBackground"
-
-const LOCATION = "Nakur, Saharanpur, Uttar Pradesh"
+import { useSite } from "@/components/providers/SiteProvider"
 
 const CONTACT = {
-  address: "Pant Vihar, Saharanpur, Uttar Pradesh",
   email: "nakurwalebabaji@gmail.com",
 }
 
@@ -15,28 +15,28 @@ const SOCIAL = {
   instagram: "https://www.instagram.com/nakur_wale_baba_ji/",
 }
 
-const NAV = [
-  { label: "Home", href: "/" },
-  { label: "About Guruji", href: "/#about" },
-  { label: "Life Journey", href: "/#life-journey" },
-  { label: "Gallery", href: "/gallery" },
-  { label: "Videos", href: "/videos" },
-  { label: "Seva", href: "/seva" },
-  { label: "Contact", href: "/contact" },
+const NAV: { key: "home" | "about" | "journey" | "gallery" | "videos" | "seva" | "contact"; href: string }[] = [
+  { key: "home", href: "/" },
+  { key: "about", href: "/#about" },
+  { key: "journey", href: "/#life-journey" },
+  { key: "gallery", href: "/gallery" },
+  { key: "videos", href: "/videos" },
+  { key: "seva", href: "/seva" },
+  { key: "contact", href: "/contact" },
 ]
 
 export default function Footer() {
+  const { t, lang } = useSite()
+
   return (
     <footer
       className="relative overflow-hidden border-t"
-      style={{ borderColor: "rgba(255,255,255,0.06)" }}
+      style={{ borderColor: "var(--header-border)" }}
     >
       {/* Top glow */}
       <div
         className="absolute inset-x-0 top-0 h-px"
-        style={{
-          background: "linear-gradient(90deg,transparent,rgba(212,168,67,0.3),transparent)",
-        }}
+        style={{ background: "linear-gradient(90deg,transparent,var(--border-gold),transparent)" }}
       />
       {/* Continuous राम राम राम watermark */}
       <RamBackground variant="marquee" opacity={0.05} />
@@ -48,17 +48,23 @@ export default function Footer() {
             <div className="flex items-center gap-3 mb-4">
               <span className="text-3xl">🕉</span>
               <div>
-                <div className="font-serif text-lg font-bold text-amber-400">
-                  Guruji Nakur Wale Baba Ji
+                <div
+                  className="font-serif text-lg font-bold"
+                  style={{ color: "var(--gold)" }}
+                  lang={lang}
+                >
+                  {t.footer.brand}
                 </div>
-                <div className="text-xs text-amber-200/40 uppercase tracking-widest">
-                  {LOCATION}
+                <div
+                  className="text-xs uppercase tracking-widest text-muted-themed"
+                  lang={lang}
+                >
+                  {t.footer.location}
                 </div>
               </div>
             </div>
-            <p className="text-amber-100/50 text-sm leading-relaxed max-w-xs mb-6">
-              A sacred space for satsang, kirtan, seva, and devotion — open to all
-              seekers of divine love and inner peace.
+            <p className="text-sm leading-relaxed max-w-xs mb-6 text-muted-themed" lang={lang}>
+              {t.footer.blurb}
             </p>
             {/* Social */}
             <div className="flex gap-3">
@@ -73,8 +79,12 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-amber-400/60 hover:text-amber-400 transition-all duration-300 hover:scale-110"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  style={{
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
+                    color: "var(--gold)",
+                  }}
                 >
                   {s.icon}
                 </a>
@@ -84,17 +94,22 @@ export default function Footer() {
 
           {/* Quick links */}
           <div>
-            <h3 className="text-amber-400 text-xs font-semibold uppercase tracking-widest mb-5">
-              Quick Links
+            <h3
+              className="text-xs font-semibold uppercase tracking-widest mb-5"
+              style={{ color: "var(--gold)" }}
+              lang={lang}
+            >
+              {t.footer.quickLinks}
             </h3>
             <ul className="space-y-2.5">
               {NAV.map((l) => (
                 <li key={l.href}>
                   <NextLink
                     href={l.href}
-                    className="text-amber-100/55 text-sm hover:text-amber-400 transition-colors"
+                    className="text-sm transition-colors text-muted-themed hover:text-heading"
+                    lang={lang}
                   >
-                    {l.label}
+                    {t.nav[l.key]}
                   </NextLink>
                 </li>
               ))}
@@ -103,13 +118,20 @@ export default function Footer() {
 
           {/* Contact quick */}
           <div>
-            <h3 className="text-amber-400 text-xs font-semibold uppercase tracking-widest mb-5">
-              Contact
+            <h3
+              className="text-xs font-semibold uppercase tracking-widest mb-5"
+              style={{ color: "var(--gold)" }}
+              lang={lang}
+            >
+              {t.footer.contactHeading}
             </h3>
-            <address className="not-italic space-y-3 text-sm text-amber-100/55">
-              <p>{CONTACT.address}</p>
+            <address className="not-italic space-y-3 text-sm text-muted-themed">
+              <p lang={lang}>{t.footer.address}</p>
               <p>
-                <a href={`mailto:${CONTACT.email}`} className="hover:text-amber-400 transition-colors">
+                <a
+                  href={`mailto:${CONTACT.email}`}
+                  className="transition-colors hover:text-heading"
+                >
                   {CONTACT.email}
                 </a>
               </p>
@@ -120,19 +142,20 @@ export default function Footer() {
         {/* Divider */}
         <div
           className="my-10 h-px"
-          style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent)" }}
+          style={{ background: "linear-gradient(90deg,transparent,var(--border),transparent)" }}
         />
 
         {/* Quote + copyright */}
         <div className="text-center">
           <blockquote
             className="font-serif text-base sm:text-lg italic mb-6"
-            style={{ color: "rgba(212,168,67,0.65)" }}
+            style={{ color: "var(--gold)" }}
+            lang={lang}
           >
-            &ldquo;Sab mein Ishwar hai — har sehal mein Seva, har qadam mein Bhakti.&rdquo;
+            &ldquo;{t.footer.quote}&rdquo;
           </blockquote>
-          <p className="text-amber-200/30 text-xs">
-            © {new Date().getFullYear()} Shri Guruji Nakur Wale Baba Ji. All Rights Reserved. Built with devotion.
+          <p className="text-xs text-muted-themed" lang={lang}>
+            © {new Date().getFullYear()} {t.footer.rights}
           </p>
         </div>
       </div>

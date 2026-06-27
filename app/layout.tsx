@@ -1,10 +1,13 @@
 import type { Metadata } from "next"
+import { cookies } from "next/headers"
 import { Geist } from "next/font/google"
 import { Playfair_Display } from "next/font/google"
 import { Noto_Serif_Devanagari } from "next/font/google"
 import "./globals.css"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
+import { SiteProvider, type Theme } from "@/components/providers/SiteProvider"
+import type { Lang } from "@/lib/i18n"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -89,18 +92,27 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const cookieStore = await cookies()
+  // Defaults: warm light theme + Hindi. Persisted choice (if any) wins.
+  const theme: Theme = cookieStore.get("theme")?.value === "dark" ? "dark" : "light"
+  const lang: Lang = cookieStore.get("lang")?.value === "en" ? "en" : "hi"
+
   return (
     <html
-      lang="en"
+      lang={lang}
+      data-theme={theme}
+      data-lang={lang}
       className={`${geistSans.variable} ${playfairDisplay.variable} ${notoSerifDevanagari.variable} antialiased`}
     >
-      <body className="min-h-screen bg-[#04000c] text-amber-50 overflow-x-hidden">
-        <Header />
-        {children}
-        <Footer />
+      <body className="min-h-screen bg-page text-body overflow-x-hidden">
+        <SiteProvider initialTheme={theme} initialLang={lang}>
+          <Header />
+          {children}
+          <Footer />
+        </SiteProvider>
       </body>
     </html>
   )

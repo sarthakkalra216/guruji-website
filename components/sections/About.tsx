@@ -3,17 +3,9 @@
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { RamBackground, Lotus } from "@/components/decor/SacredBackground"
+import { useSite } from "@/components/providers/SiteProvider"
 
 // ── परिचय (about me) — स्रोत: public/about me/about me_extracted_text.txt ─────
-
-const SHORT_BIO =
-  "श्री श्री 108 स्वामी रामानन्द सरस्वती जी महाराज — प्रेम से 'नकुड़ वाले बाबा जी' कहलाने वाले — एक ऐसे महान सन्त थे जिनका सम्पूर्ण जीवन दूसरों के कल्याण को समर्पित रहा। उनका कहना था कि मनुष्य पहले इन्सान है, बाद में हिन्दू या मुसलमान।"
-
-const BIO_PARAS = [
-  "बचपन में 'जहान सिंह' नाम से जाने गए गुरुजी का जन्म चैत्र शुक्ल अष्टमी, सन् 1912 (सम्वत् 1968 वि०) को जिला बागपत के ग्राम बामनौली में हुआ। उनकी माता श्रीमती भारती देवी (गाँव सरूरपुर) में प्रभु राम की भक्ति कूट-कूट कर भरी थी, और वही संस्कार धीरे-धीरे उनमें पल्लवित होते गए। बचपन से ही उनका हृदय दुखियों पर तरस खाता था और वे सदैव उनकी सेवा करते थे।",
-  "सन् 1934 में गाँव कुरमाली की भागीरथी देवी से उनका विवाह हुआ, और 18 जनवरी 1936 को उन्हें पुलिस विभाग में नौकरी मिली। सेवा के दौरान वे भारत के अनेक स्थानों पर रहे तथा महात्मा गांधी, पं० जवाहरलाल नेहरू, डॉ० राजेन्द्र प्रसाद व श्री लाल बहादुर शास्त्री जैसे नेताओं के पास ड्यूटी पर रहे — फिर भी न कभी किसी को गाली दी, न कर्तव्य की अवहेलना की, और जीवन भर किसी से एक पाई-पैसा नहीं लिया।",
-  "सन् 1953-54 में उन्होंने पुलिस लाइन में रामायण पर प्रवचन देना आरम्भ किया और 'बाबा' के रूप में विख्यात हुए। संसार को निःसार समझकर 5 सितम्बर 1981 को हरिद्वार में श्री नारायण मुनि जी महाराज से संन्यास की दीक्षा ली, जिन्होंने उन्हें 'श्री रामानन्द सरस्वती' नाम दिया। 15 जनवरी 2003 को वे प्रभु श्री राम के ध्यान में लीन होकर महासमाधि को प्राप्त हुए।",
-]
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -22,6 +14,7 @@ const fadeUp = {
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.11 } } }
 
 export default function About() {
+  const { t, lang } = useSite()
   return (
     <section id="about" className="relative py-24 sm:py-32 overflow-hidden">
       {/* Section glow */}
@@ -46,17 +39,18 @@ export default function About() {
         >
           <motion.span
             variants={fadeUp}
-            className="text-amber-400 text-xs font-semibold uppercase tracking-[0.25em]"
-            lang="hi"
+            className="text-xs font-semibold uppercase tracking-[0.25em]"
+            style={{ color: "var(--gold)" }}
+            lang={lang}
           >
-            जीवन परिचय
+            {t.about.eyebrow}
           </motion.span>
           <motion.h2
             variants={fadeUp}
-            className="mt-3 font-serif text-3xl sm:text-5xl font-bold text-amber-50"
-            lang="hi"
+            className="mt-3 font-serif text-3xl sm:text-5xl font-bold text-heading"
+            lang={lang}
           >
-            गुरुजी का <span className="gold-text">परिचय</span>
+            {t.about.titleLead} <span className="gold-text">{t.about.titleEm}</span>
           </motion.h2>
           <motion.div variants={fadeUp} className="flex justify-center mt-5">
             <Lotus className="w-24 h-14 opacity-50" />
@@ -84,14 +78,14 @@ export default function About() {
               />
               <Image
                 src="/images/photo2.jpg"
-                alt="श्री गुरुजी नकुड़ वाले बाबा जी"
+                alt={t.about.imgAlt}
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 448px"
               />
               <div
                 className="absolute inset-0 rounded-3xl pointer-events-none"
-                style={{ border: "1px solid rgba(212,168,67,0.25)" }}
+                style={{ border: "1px solid var(--border-gold)" }}
               />
             </div>
           </motion.div>
@@ -105,18 +99,19 @@ export default function About() {
           >
             <motion.blockquote
               variants={fadeUp}
-              lang="hi"
-              className="font-serif text-lg sm:text-xl text-amber-300/90 font-medium italic leading-relaxed mb-8 border-l-2 border-amber-400/40 pl-5"
+              lang={lang}
+              className="font-serif text-lg sm:text-xl font-medium italic leading-relaxed mb-8 border-l-2 pl-5"
+              style={{ color: "var(--gold)", borderColor: "var(--border-gold)" }}
             >
-              &ldquo;{SHORT_BIO}&rdquo;
+              &ldquo;{t.about.shortBio}&rdquo;
             </motion.blockquote>
 
-            {BIO_PARAS.map((para, i) => (
+            {t.about.paras.map((para, i) => (
               <motion.p
                 key={i}
                 variants={fadeUp}
-                lang="hi"
-                className="text-amber-100/70 leading-8 mb-4 text-[0.95rem]"
+                lang={lang}
+                className="leading-8 mb-4 text-[0.95rem] text-muted-themed"
               >
                 {para}
               </motion.p>

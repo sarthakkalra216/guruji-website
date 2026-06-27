@@ -4,8 +4,23 @@ import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { ChevronDown, Sparkles, Volume2, VolumeX } from "lucide-react"
+import { useSite } from "@/components/providers/SiteProvider"
 
-const TAGLINE = "दिव्य ज्ञान, सेवा, प्रेम और आध्यात्मिक जागृति का प्रसार"
+// The hero stays cinematically dark in BOTH themes (it sits over a video), so
+// these bright gradients are inlined instead of the theme-aware .gold-text /
+// .purple-text classes (which darken in light mode and would vanish here).
+const goldGradient = {
+  background: "linear-gradient(135deg,#fde68a 0%,#f59e0b 45%,#d4a843 100%)",
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+} as const
+const purpleGradient = {
+  background: "linear-gradient(135deg,#c4b5fd 0%,#a78bfa 50%,#7c3aed 100%)",
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+} as const
 
 interface Particle {
   id: number
@@ -29,6 +44,7 @@ const COLORS = [
 ]
 
 export default function Hero() {
+  const { t, lang } = useSite()
   const [particles, setParticles] = useState<Particle[]>([])
   const [isMuted, setIsMuted] = useState(true)
   const [videoError, setVideoError] = useState(false)
@@ -70,10 +86,11 @@ export default function Hero() {
 
       {/* Video background — upper portion only, fades into the page colour */}
       {!videoError && (
-        <div className="absolute inset-x-0 top-0 h-[58%] overflow-hidden pointer-events-none">
+        <div className="absolute inset-x-0 top-0 h-[78%] overflow-hidden pointer-events-none">
           <video
             ref={videoRef}
             className="absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition: "center 30%" }}
             autoPlay
             muted
             loop
@@ -88,7 +105,7 @@ export default function Hero() {
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to bottom, transparent 40%, rgba(4,0,12,0.85) 80%, #04000c 100%)",
+                "linear-gradient(to bottom, transparent 72%, rgba(4,0,12,0.85) 92%, #04000c 100%)",
             }}
           />
         </div>
@@ -97,8 +114,9 @@ export default function Hero() {
       {/* Fallback: photo when video can't load — upper part only */}
       {videoError && (
         <div
-          className="absolute inset-x-0 top-0 h-[58%] bg-cover bg-center"
+          className="absolute inset-x-0 top-0 h-[78%] bg-cover"
           style={{
+            backgroundPosition: "center 30%",
             backgroundImage:
               "linear-gradient(to bottom, transparent 40%, #04000c 100%), url('/images/photo3.jpg')",
           }}
@@ -106,7 +124,7 @@ export default function Hero() {
       )}
 
       {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-black/65" />
+      <div className="absolute inset-0 bg-black/35" />
 
       {/* Radial glows on top of video */}
       <div
@@ -131,20 +149,6 @@ export default function Hero() {
           backgroundSize: "80px 80px",
         }}
       />
-
-      {/* Decorative Om */}
-      <div
-        className="absolute select-none pointer-events-none text-[28rem] font-bold leading-none opacity-[0.015]"
-        style={{
-          fontFamily: "serif",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -52%)",
-          color: "#d4a843",
-        }}
-      >
-        ॐ
-      </div>
 
       {/* Particles */}
       {particles.map((p) => (
@@ -201,7 +205,7 @@ export default function Hero() {
           lang="hi"
         >
           <Sparkles size={13} className="animate-pulse" />
-          <span>जय गुरुजी — नकुड़ वाले बाबा जी</span>
+          <span lang={lang}>{t.hero.badge}</span>
           <Sparkles size={13} className="animate-pulse" />
         </motion.div>
 
@@ -211,31 +215,31 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.15 }}
           className="font-hindi font-bold mb-5 sm:mb-6"
-          lang="hi"
+          lang={lang}
         >
           <span
             className="block text-amber-200/90 text-base sm:text-2xl lg:text-3xl mb-2 font-medium"
             style={{ lineHeight: 1.6, paddingBlock: "0.1em" }}
           >
-            परम श्रद्धेय
+            {t.hero.eyebrow}
           </span>
           <span
-            className="block gold-text text-3xl sm:text-5xl lg:text-6xl"
-            style={{ lineHeight: 1.5, paddingBlock: "0.14em" }}
+            className="block text-3xl sm:text-5xl lg:text-6xl"
+            style={{ ...goldGradient, lineHeight: 1.5, paddingBlock: "0.14em" }}
           >
-            श्री श्री १०८ स्वामी रामानन्द
+            {t.hero.name1}
           </span>
           <span
             className="block text-amber-50 text-3xl sm:text-5xl lg:text-6xl"
             style={{ lineHeight: 1.5, paddingBlock: "0.14em" }}
           >
-            सरस्वती जी महाराज
+            {t.hero.name2}
           </span>
           <span
-            className="block purple-text text-2xl sm:text-4xl lg:text-5xl mt-2 sm:mt-3"
-            style={{ lineHeight: 1.55, paddingBlock: "0.16em" }}
+            className="block text-2xl sm:text-4xl lg:text-5xl mt-2 sm:mt-3"
+            style={{ ...purpleGradient, lineHeight: 1.55, paddingBlock: "0.16em" }}
           >
-            (नकुड़ वाले बाबा जी)
+            {t.hero.name3}
           </span>
         </motion.h1>
 
@@ -257,9 +261,9 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.35 }}
           className="font-hindi text-base sm:text-xl lg:text-2xl text-amber-200/80 max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed"
-          lang="hi"
+          lang={lang}
         >
-          {TAGLINE}
+          {t.hero.tagline}
         </motion.p>
 
         {/* CTAs */}
@@ -272,16 +276,16 @@ export default function Hero() {
           <button
             onClick={() => scrollTo("#about")}
             className="font-hindi w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-900 font-bold text-base hover:from-amber-300 hover:to-yellow-400 transition-all duration-300 shadow-xl shadow-amber-500/25 hover:shadow-amber-400/45 hover:scale-105 cursor-pointer"
-            lang="hi"
+            lang={lang}
           >
-            गुरुजी को जानें
+            {t.hero.ctaPrimary}
           </button>
           <Link
             href="/contact"
             className="font-hindi w-full sm:w-auto px-8 py-4 rounded-full border border-amber-400/40 text-amber-300 font-bold text-base hover:bg-amber-400/10 hover:border-amber-400 hover:text-amber-400 transition-all duration-300 backdrop-blur-sm cursor-pointer text-center"
-            lang="hi"
+            lang={lang}
           >
-            संपर्क करें
+            {t.hero.ctaSecondary}
           </Link>
         </motion.div>
 
@@ -292,16 +296,12 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.75 }}
           className="grid grid-cols-3 gap-6 max-w-sm mx-auto"
         >
-          {[
-            { value: "५०+", label: "वर्षों की सेवा" },
-            { value: "१ लाख+", label: "श्रद्धालु" },
-            { value: "∞", label: "दिव्य प्रेम" },
-          ].map((s) => (
+          {t.hero.stats.map((s) => (
             <div key={s.label} className="text-center">
               <div className="font-hindi text-2xl sm:text-3xl font-bold text-amber-400">
                 {s.value}
               </div>
-              <div className="font-hindi text-xs text-amber-200/60 mt-1 tracking-wide" lang="hi">
+              <div className="font-hindi text-xs text-amber-200/60 mt-1 tracking-wide" lang={lang}>
                 {s.label}
               </div>
             </div>
@@ -318,7 +318,7 @@ export default function Hero() {
         onClick={() => scrollTo("#about")}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-amber-400/50 hover:text-amber-400 transition-colors cursor-pointer"
       >
-        <span className="font-hindi text-[11px] tracking-[0.2em]" lang="hi">दर्शन</span>
+        <span className="font-hindi text-[11px] tracking-[0.2em]" lang={lang}>{t.hero.scrollCue}</span>
         <motion.div
           animate={{ y: [0, 7, 0] }}
           transition={{ duration: 1.6, repeat: Infinity }}

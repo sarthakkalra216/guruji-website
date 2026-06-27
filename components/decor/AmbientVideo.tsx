@@ -2,7 +2,7 @@
 
 /**
  * Ambient background video — plays muted, on loop, autoplaying.
- * Heavily tinted/faded into the page colour (#04000c) so it reads as a soft
+ * Heavily tinted/faded into the page colour (var(--bg)) so it reads as a soft
  * moving backdrop effect rather than an obvious video. Background layer only.
  */
 export function AmbientVideo({
@@ -43,7 +43,7 @@ export function AmbientVideo({
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, #04000c 0%, transparent 26%, transparent 70%, #04000c 100%)",
+            "linear-gradient(to bottom, var(--bg) 0%, transparent 26%, transparent 70%, var(--bg) 100%)",
         }}
       />
       {/* Theme tint (purple/gold) so the colours match the site */}

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ChevronLeft, ChevronRight, X, ZoomIn, ImageOff } from "lucide-react"
 import { RamBackground } from "@/components/decor/SacredBackground"
 import { AmbientVideo } from "@/components/decor/AmbientVideo"
+import { useSite } from "@/components/providers/SiteProvider"
 
 export interface GalleryImage {
   src: string
@@ -23,6 +24,7 @@ const fadeUp = {
 const morph = { type: "spring" as const, stiffness: 220, damping: 28 }
 
 export default function Gallery({ images }: { images: GalleryImage[] }) {
+  const { t, lang } = useSite()
   const [active, setActive] = useState<number | null>(null)
   const count = images.length
 
@@ -75,30 +77,34 @@ export default function Gallery({ images }: { images: GalleryImage[] }) {
         >
           <motion.span
             variants={fadeUp}
-            className="text-amber-400 text-xs font-semibold uppercase tracking-[0.25em]"
+            className="text-xs font-semibold uppercase tracking-[0.25em]"
+            style={{ color: "var(--gold)" }}
+            lang={lang}
           >
-            Sacred Moments
+            {t.gallery.eyebrow}
           </motion.span>
           <motion.h2
             variants={fadeUp}
-            className="mt-3 font-serif text-3xl sm:text-5xl font-bold text-amber-50"
+            className="mt-3 font-serif text-3xl sm:text-5xl font-bold text-heading"
+            lang={lang}
           >
-            Divine <span className="gold-text">Gallery</span>
+            {t.gallery.titleLead} <span className="gold-text">{t.gallery.titleEm}</span>
           </motion.h2>
           <motion.p
             variants={fadeUp}
-            className="mt-4 text-amber-100/60 max-w-xl mx-auto text-sm leading-relaxed"
+            className="mt-4 max-w-xl mx-auto text-sm leading-relaxed text-muted-themed"
+            lang={lang}
           >
-            Moments of Spiritual Grace, Seva, and Divine Blessings
+            {t.gallery.subtitle}
           </motion.p>
           <motion.div variants={fadeUp} className="section-divider" />
         </motion.div>
 
         {/* ── Masonry grid ── */}
         {count === 0 ? (
-          <div className="flex flex-col items-center gap-3 text-amber-200/40 py-20">
+          <div className="flex flex-col items-center gap-3 py-20 text-muted-themed">
             <ImageOff size={36} />
-            <p className="text-sm">No images yet. Add photos to <code>public/images</code>.</p>
+            <p className="text-sm" lang={lang}>{t.gallery.empty} <code>public/images</code>.</p>
           </div>
         ) : (
           <div className="columns-2 md:columns-3 lg:columns-4 gap-4 sm:gap-5">
@@ -111,7 +117,7 @@ export default function Gallery({ images }: { images: GalleryImage[] }) {
                 transition={{ duration: 0.5, delay: Math.min(i * 0.04, 0.4) }}
                 onClick={() => setActive(i)}
                 className="group relative mb-4 sm:mb-5 block w-full break-inside-avoid overflow-hidden rounded-2xl cursor-pointer"
-                style={{ border: "1px solid rgba(212,168,67,0.14)" }}
+                style={{ border: "1px solid var(--border-gold)" }}
                 aria-label={`Open image ${i + 1}`}
               >
                 {/* Shared-element thumbnail (morphs into the fullscreen view) */}

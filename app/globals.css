@@ -1,15 +1,77 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
   --font-sans: var(--font-geist-sans);
   --font-serif: var(--font-playfair);
 }
 
-:root {
-  --background: #04000c;
-  --foreground: #fef9f0;
+/* ───────────────────────────────────────────────────────────────────────────
+   THEME TOKENS
+   :root / [data-theme="light"] = warm temple cream (default)
+   [data-theme="dark"]          = original deep-temple palette
+   Components reference these via the semantic utility classes below or var(--*).
+   ─────────────────────────────────────────────────────────────────────────── */
+:root,
+[data-theme="light"] {
+  --bg: #fdf6e9;
+  --bg-2: #f6e9d2;
+  --surface: #ffffff;
+  --surface-2: #fffaf0;
+  --surface-strong: #ffffff;
+  --border: rgba(122, 46, 30, 0.14);
+  --border-gold: rgba(180, 120, 30, 0.32);
+  --text: #3a1d0c;
+  --text-muted: rgba(58, 29, 12, 0.66);
+  --heading: #7a2e1e;
+  --gold: #b0780f;
+  --gold-soft: #d99b2b;
+  --purple: #6d28d9;
+  /* gold gradient text — deeper on cream so it stays legible */
+  --gt-1: #c9821b;
+  --gt-2: #a8590a;
+  --gt-3: #7a3f08;
+  /* purple gradient text */
+  --pt-1: #7c3aed;
+  --pt-2: #6d28d9;
+  --pt-3: #4c1d95;
+  --ram-ink: #c98a2e;
+  --card-shadow: 0 18px 40px -18px rgba(122, 46, 30, 0.28);
+  --header-bg: rgba(253, 246, 233, 0.88);
+  --header-border: rgba(122, 46, 30, 0.12);
+  --hover-surface: rgba(122, 46, 30, 0.06);
+  --video-overlay: rgba(253, 246, 233, 0.42);
+  --on-accent: #2a1404;
+}
+
+[data-theme="dark"] {
+  --bg: #04000c;
+  --bg-2: #0a0512;
+  --surface: rgba(255, 255, 255, 0.03);
+  --surface-2: rgba(255, 255, 255, 0.05);
+  --surface-strong: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-gold: rgba(212, 168, 67, 0.16);
+  --text: #fef9f0;
+  --text-muted: rgba(254, 243, 220, 0.7);
+  --heading: #fffaf0;
+  --gold: #d4a843;
+  --gold-soft: #fde68a;
+  --purple: #a78bfa;
+  --gt-1: #fde68a;
+  --gt-2: #f59e0b;
+  --gt-3: #d4a843;
+  --pt-1: #c4b5fd;
+  --pt-2: #a78bfa;
+  --pt-3: #7c3aed;
+  --ram-ink: #e9c46a;
+  --card-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+  --header-bg: rgba(2, 6, 23, 0.9);
+  --header-border: rgba(255, 255, 255, 0.1);
+  --hover-surface: rgba(255, 255, 255, 0.05);
+  --video-overlay: rgba(0, 0, 0, 0.35);
+  --on-accent: #1a0a00;
 }
 
 html {
@@ -17,9 +79,21 @@ html {
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--bg);
+  color: var(--text);
   overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* ─── Semantic, theme-aware utility classes ──────────────────────────────── */
+.bg-page { background-color: var(--bg); }
+.text-body { color: var(--text); }
+.text-muted-themed { color: var(--text-muted); }
+.text-heading { color: var(--heading); }
+.surface-card {
+  background: var(--surface);
+  border: 1px solid var(--border-gold);
+  box-shadow: var(--card-shadow);
 }
 
 /* Custom scrollbar */
@@ -27,24 +101,24 @@ body {
   width: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #04000c;
+  background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #d4a843, #7c3aed);
+  background: linear-gradient(to bottom, var(--gold), var(--purple));
   border-radius: 999px;
 }
 
 /* Reusable glass card */
 .glass {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--surface);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
 }
 
 /* Gold gradient text */
 .gold-text {
-  background: linear-gradient(135deg, #fde68a 0%, #f59e0b 45%, #d4a843 100%);
+  background: linear-gradient(135deg, var(--gt-1) 0%, var(--gt-2) 45%, var(--gt-3) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -52,7 +126,7 @@ body {
 
 /* Purple gradient text */
 .purple-text {
-  background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 50%, #7c3aed 100%);
+  background: linear-gradient(135deg, var(--pt-1) 0%, var(--pt-2) 50%, var(--pt-3) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -71,7 +145,7 @@ body {
   content: "";
   height: 1px;
   width: 3rem;
-  background: rgba(212, 168, 67, 0.4);
+  background: var(--border-gold);
 }
 
 /* Typing dots animation */
@@ -103,10 +177,14 @@ body {
    pointer-events-none, very low opacity (3%–8%). Never affects readability.
    ─────────────────────────────────────────────────────────────────────────── */
 
-/* Elegant Devanagari display face for Hindi headings */
+/* Elegant Devanagari display face for Hindi headings.
+   In English mode, fall back to the Playfair serif so headings read naturally. */
 .font-hindi {
   font-family: var(--font-devanagari), "Noto Serif Devanagari", "Tiro Devanagari Hindi",
     serif;
+}
+[data-lang="en"] .font-hindi {
+  font-family: var(--font-playfair), Georgia, serif;
 }
 
 /* Devanagari watermark face — falls back gracefully to system Devanagari */
@@ -114,7 +192,7 @@ body {
   font-family: var(--font-devanagari), "Noto Serif Devanagari", "Noto Sans Devanagari",
     "Tiro Devanagari Hindi", serif;
   font-weight: 700;
-  color: #e9c46a;
+  color: var(--ram-ink);
   -webkit-font-smoothing: antialiased;
   user-select: none;
   white-space: nowrap;

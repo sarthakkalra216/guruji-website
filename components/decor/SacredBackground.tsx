@@ -91,8 +91,9 @@ export function RamBackground({ variant = "tiled", opacity, className }: RamBack
   //    always covers the full section height (the text never "ends"). ─────────
   if (variant === "vertical") {
     const SPEED = "120s"
-    // padding from the main content — sits in the side gutter
-    const EDGE = "clamp(0.5rem, 2vw, 2.25rem)"
+    // padding from the main content — sits in the side gutter (hugs the very
+    // edge on mobile so it never crowds the narrow content column)
+    const EDGE = "clamp(0.15rem, 2vw, 2.25rem)"
     const columns: { side: "left" | "right"; dir: "normal" | "reverse" }[] = [
       { side: "left", dir: "normal" },   // left  → upward
       { side: "right", dir: "reverse" }, // right → downward
@@ -104,7 +105,7 @@ export function RamBackground({ variant = "tiled", opacity, className }: RamBack
             key={i}
             className="ram-glyph"
             style={{
-              fontSize: "1.6rem",
+              fontSize: "clamp(0.95rem, 3.5vw, 1.6rem)",
               writingMode: "vertical-rl",
               letterSpacing: "0.35em",
               textShadow:
@@ -125,7 +126,7 @@ export function RamBackground({ variant = "tiled", opacity, className }: RamBack
         {columns.map((col, ci) => (
           <div
             key={ci}
-            className="absolute inset-y-0 overflow-hidden hidden md:block"
+            className="absolute inset-y-0 overflow-hidden block"
             style={col.side === "left" ? { left: EDGE } : { right: EDGE }}
           >
             <div

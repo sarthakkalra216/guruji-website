@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { Play, Pause, Volume2, VolumeX, VideoOff } from "lucide-react"
 import { RamBackground } from "@/components/decor/SacredBackground"
 import { AmbientVideo } from "@/components/decor/AmbientVideo"
+import { useSite } from "@/components/providers/SiteProvider"
 
 export interface VideoItem {
   src: string
@@ -152,10 +153,13 @@ function VideoCard({ video, index }: { video: VideoItem; index: number }) {
 }
 
 export default function VideoGallery({ videos }: { videos: VideoItem[] }) {
+  const { t, lang } = useSite()
   return (
     <section id="videos" className="relative py-24 sm:py-32 overflow-hidden">
-      {/* Ambient looping video backdrop — blends into the page colour */}
-      <AmbientVideo src="/videos/video2.mp4" opacity={0.22} className="z-0" />
+      {/* Ambient video backdrop above the gallery — blends into page */}
+      <div className="absolute top-0 inset-x-0 h-[78vh] z-0">
+        <AmbientVideo src="/background%20effect/gallery-bg.mp4" />
+      </div>
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -176,30 +180,33 @@ export default function VideoGallery({ videos }: { videos: VideoItem[] }) {
         >
           <motion.span
             variants={fadeUp}
-            className="text-amber-400 text-xs font-semibold uppercase tracking-[0.25em]"
+            className="text-xs font-semibold uppercase tracking-[0.25em]"
+            style={{ color: "var(--gold)" }}
+            lang={lang}
           >
-            Ashram Recordings
+            {t.videos.eyebrow}
           </motion.span>
           <motion.h2
             variants={fadeUp}
-            className="mt-3 font-serif text-3xl sm:text-5xl font-bold text-amber-50"
+            className="mt-3 font-serif text-3xl sm:text-5xl font-bold text-heading"
+            lang={lang}
           >
-            Sacred <span className="gold-text">Videos</span>
+            {t.videos.titleLead} <span className="gold-text">{t.videos.titleEm}</span>
           </motion.h2>
           <motion.p
             variants={fadeUp}
-            className="mt-4 text-amber-100/60 max-w-xl mx-auto text-sm"
+            className="mt-4 max-w-xl mx-auto text-sm text-muted-themed"
+            lang={lang}
           >
-            Immerse yourself in the divine atmosphere of Guruji&apos;s ashram.
-            Click play — sound is on.
+            {t.videos.subtitle}
           </motion.p>
           <motion.div variants={fadeUp} className="section-divider" />
         </motion.div>
 
         {videos.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 text-amber-200/40 py-20">
+          <div className="flex flex-col items-center gap-3 py-20 text-muted-themed">
             <VideoOff size={36} />
-            <p className="text-sm">No videos yet. Add files to <code>public/videos</code>.</p>
+            <p className="text-sm" lang={lang}>{t.videos.empty} <code>public/videos</code>.</p>
           </div>
         ) : (
           <motion.div

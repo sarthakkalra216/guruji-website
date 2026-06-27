@@ -6,21 +6,24 @@ import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useSite } from "@/components/providers/SiteProvider"
+import SettingsToggles from "@/components/layout/SettingsToggles"
 
-const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/#about" },
-  { label: "Life Journey", href: "/#life-journey" },
-  { label: "Gallery", href: "/gallery" },
-  { label: "Videos", href: "/videos" },
-  { label: "Seva", href: "/seva" },
-  { label: "Contact", href: "/contact" },
+const navLinks: { key: keyof ReturnType<typeof useSite>["t"]["nav"]; href: string }[] = [
+  { key: "home", href: "/" },
+  { key: "about", href: "/#about" },
+  { key: "journey", href: "/#life-journey" },
+  { key: "gallery", href: "/gallery" },
+  { key: "videos", href: "/videos" },
+  { key: "seva", href: "/seva" },
+  { key: "contact", href: "/contact" },
 ]
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
+  const { t } = useSite()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60)
@@ -40,10 +43,13 @@ export default function Header() {
       <header
         className={cn(
           "fixed top-0 inset-x-0 z-50 transition-all duration-500",
-          scrolled
-            ? "bg-slate-950/90 backdrop-blur-xl border-b border-white/10 shadow-2xl shadow-black/30"
-            : "bg-transparent"
+          scrolled ? "backdrop-blur-xl border-b shadow-2xl" : "bg-transparent border-b border-transparent"
         )}
+        style={
+          scrolled
+            ? { background: "var(--header-bg)", borderColor: "var(--header-border)" }
+            : undefined
+        }
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Logo — जय श्री राम */}
@@ -54,7 +60,7 @@ export default function Header() {
               className="grid place-items-center w-10 h-10 sm:w-11 sm:h-11 rounded-full shrink-0 font-hindi text-xl sm:text-2xl transition-transform duration-300 group-hover:scale-105"
               style={{
                 background: "linear-gradient(135deg,#f59e0b,#d4a843)",
-                color: "#1a0a00",
+                color: "var(--on-accent)",
                 boxShadow: "0 4px 16px rgba(212,168,67,0.4)",
               }}
             >
@@ -69,7 +75,7 @@ export default function Header() {
                 जय श्री राम
               </div>
               <div
-                className="font-hindi text-[9px] sm:text-[10px] text-amber-200/55 tracking-[0.18em]"
+                className="font-hindi text-[9px] sm:text-[10px] text-muted-themed tracking-[0.18em]"
                 lang="hi"
               >
                 नकुड़ वाले बाबा जी
@@ -84,45 +90,52 @@ export default function Header() {
                 <Link
                   href={link.href}
                   className={cn(
-                    "px-3 py-2 text-sm transition-colors rounded-lg hover:bg-white/5 cursor-pointer",
-                    isActive(link.href)
-                      ? "text-amber-400 font-semibold"
-                      : "text-amber-100/70 hover:text-amber-400"
+                    "px-3 py-2 text-sm transition-colors rounded-lg cursor-pointer",
+                    isActive(link.href) ? "font-semibold" : ""
                   )}
+                  style={{
+                    color: isActive(link.href) ? "var(--gold)" : "var(--text-muted)",
+                  }}
                 >
-                  {link.label}
+                  {t.nav[link.key]}
                 </Link>
               </li>
             ))}
           </ul>
 
-          {/* CTA */}
-          <Link
-            href="/contact"
-            className="hidden lg:inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 font-semibold text-sm px-5 py-2 rounded-full hover:from-amber-400 hover:to-yellow-300 transition-all duration-300 shadow-lg shadow-amber-500/20 hover:scale-105 cursor-pointer"
-          >
-            Get in Touch
-          </Link>
+          {/* Right cluster: toggles + CTA + hamburger */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <SettingsToggles />
 
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            className="lg:hidden p-2 text-amber-400 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
-            aria-label="Toggle navigation"
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={menuOpen ? "x" : "menu"}
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="block"
-              >
-                {menuOpen ? <X size={22} /> : <Menu size={22} />}
-              </motion.span>
-            </AnimatePresence>
-          </button>
+            <Link
+              href="/contact"
+              className="hidden lg:inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-400 font-semibold text-sm px-5 py-2 rounded-full hover:from-amber-400 hover:to-yellow-300 transition-all duration-300 shadow-lg shadow-amber-500/20 hover:scale-105 cursor-pointer"
+              style={{ color: "var(--on-accent)" }}
+            >
+              {t.nav.cta}
+            </Link>
+
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              className="lg:hidden p-2 rounded-lg transition-colors cursor-pointer"
+              style={{ color: "var(--gold)" }}
+              aria-label="Toggle navigation"
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={menuOpen ? "x" : "menu"}
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="block"
+                >
+                  {menuOpen ? <X size={22} /> : <Menu size={22} />}
+                </motion.span>
+              </AnimatePresence>
+            </button>
+          </div>
         </nav>
       </header>
 
@@ -135,7 +148,7 @@ export default function Header() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
               onClick={() => setMenuOpen(false)}
             />
             <motion.aside
@@ -144,13 +157,20 @@ export default function Header() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 32 }}
-              className="fixed right-0 top-0 bottom-0 z-50 w-72 bg-slate-950 border-l border-white/10 flex flex-col lg:hidden"
+              className="fixed right-0 top-0 bottom-0 z-50 w-72 flex flex-col lg:hidden border-l"
+              style={{ background: "var(--bg)", borderColor: "var(--header-border)" }}
             >
-              <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-                <span className="text-amber-400 font-semibold text-sm">🕉 Navigation</span>
+              <div
+                className="flex items-center justify-between px-5 py-4 border-b"
+                style={{ borderColor: "var(--header-border)" }}
+              >
+                <span className="font-semibold text-sm" style={{ color: "var(--gold)" }}>
+                  🕉 {t.nav.navHeading}
+                </span>
                 <button
                   onClick={() => setMenuOpen(false)}
-                  className="p-1.5 text-amber-200/50 hover:text-amber-400 transition-colors cursor-pointer"
+                  className="p-1.5 transition-colors cursor-pointer"
+                  style={{ color: "var(--text-muted)" }}
                 >
                   <X size={18} />
                 </button>
@@ -167,26 +187,32 @@ export default function Header() {
                     <Link
                       href={link.href}
                       onClick={() => setMenuOpen(false)}
-                      className={cn(
-                        "block w-full text-left px-4 py-3 hover:bg-white/5 rounded-xl transition-all duration-200 text-sm cursor-pointer",
-                        isActive(link.href)
-                          ? "text-amber-400 font-semibold"
-                          : "text-amber-100/80 hover:text-amber-400"
-                      )}
+                      className="block w-full text-left px-4 py-3 rounded-xl transition-all duration-200 text-sm cursor-pointer"
+                      style={{
+                        color: isActive(link.href) ? "var(--gold)" : "var(--text-muted)",
+                        fontWeight: isActive(link.href) ? 600 : 400,
+                      }}
                     >
-                      {link.label}
+                      {t.nav[link.key]}
                     </Link>
                   </motion.div>
                 ))}
               </nav>
 
-              <div className="p-4 border-t border-white/10">
+              <div
+                className="p-4 border-t space-y-4"
+                style={{ borderColor: "var(--header-border)" }}
+              >
+                <div className="flex justify-center">
+                  <SettingsToggles compact />
+                </div>
                 <Link
                   href="/contact"
                   onClick={() => setMenuOpen(false)}
-                  className="block text-center w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 font-semibold py-3 rounded-full hover:from-amber-400 hover:to-yellow-300 transition-all text-sm cursor-pointer"
+                  className="block text-center w-full bg-gradient-to-r from-amber-500 to-yellow-400 font-semibold py-3 rounded-full hover:from-amber-400 hover:to-yellow-300 transition-all text-sm cursor-pointer"
+                  style={{ color: "var(--on-accent)" }}
                 >
-                  Get in Touch
+                  {t.nav.cta}
                 </Link>
               </div>
             </motion.aside>
